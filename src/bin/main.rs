@@ -6,9 +6,8 @@ fn main() {
     let mut world = World::new(10, 10);
 
     let run = true;
-    world.step();
-    //while run {
-    //    world.step();
-    //    thread::sleep(time::Duration::from_secs(1));
-    //}
+    while run {
+        world.step();
+        thread::sleep(time::Duration::from_secs(1));
+    }
 }
