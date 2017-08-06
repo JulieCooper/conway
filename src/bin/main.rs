@@ -5,6 +5,8 @@ use std::{thread, time};
 fn main() {
     let mut world = World::new(10, 10);
 
+    world.set_rules(|x| { 3; () });
+
     let run = true;
     while run {
         world.step();

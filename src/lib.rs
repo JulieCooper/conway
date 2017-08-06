@@ -13,6 +13,9 @@ impl Cell {
     fn new(xy: (u64, u64), init: CellState) -> Self {
         Cell { xy: xy, state: init }
     }
+    fn set_state(&mut self, new: CellState) {
+        self.state = new;
+    }
 }
 pub struct World {
     steps: u64,
@@ -48,6 +51,14 @@ impl World {
         }
 
         World { grid: grid, width: w, height: h, steps: 0 }
+    }
+    pub fn set_rules<F: FnMut(u64)>(&mut self, f: F) {}
+    fn set_cell_state(&mut self, xy: (u64, u64), new: CellState) {
+        let index = xy.0 + (self.width - 1) * xy.1;
+
+        if let Some(cell) = self.grid.get_mut(index as usize) {
+            cell.set_state(new)
+        }
     }
     fn get_cell_state(&self, xy: (u64, u64)) -> CellState {
         let index = xy.0 + (self.width - 1) * xy.1;
@@ -92,6 +103,10 @@ impl World {
      * How to keep track of states, their behaviors, and transitions between states?
      */
     fn apply_state_changes(&mut self, changes: Vec<CellTransition>) -> StepResult {
+        changes.into_iter().map(|transition| {
+            let CellTransition { xy, old, new } = transition;
+            self.set_cell_state(xy, new);
+        });
         StepResult {
             steps: 10,
             updated_cells: 100,
