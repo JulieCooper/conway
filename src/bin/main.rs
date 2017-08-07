@@ -4,6 +4,9 @@ use conway::{Cell, CellState, Ruleset};
 use std::{thread, time};
 
 fn main() {
+    let init = vec![
+        //(2, 1), (1, 3), (2, 3), (3, 3), (3, 2)
+    ];
     let neighbors = vec![
         (-1,-1), (0,-1), (1,-1),
         (-1, 0),         (1, 0),
@@ -27,34 +30,33 @@ fn main() {
         };
     let ruleset = Ruleset {
         neighbors: neighbors,
-        rules: Box::new(rules)
+        rules: Box::new(rules),
+        init: init,
     };
 
-    let mut world = World::new(50, 10, ruleset);
+    let width = 100;
+    let mut world = World::new(width, 20, ruleset);
 
     let run = true;
-    //world.step();
-    //let grid = world.return_grid();
-    //display_grid(grid);
     while run {
-        display_grid(world.return_grid());
+        display_grid(world.return_grid(), width as usize);
         world.step();
-        thread::sleep(time::Duration::from_secs(1));
+        thread::sleep(time::Duration::from_millis(200));
     }
 }
 
-fn display_grid(grid: &Vec<Cell>) {
+fn display_grid(grid: &Vec<Cell>, width: usize) {
     let mut row = String::new();
     println!("-----");
     for (index, cell) in grid.iter().enumerate() {
         if let CellState::Dead = cell.state {
             row.push(' ');
         } else {
-            row.push('*');
+            row.push('x');
         }
         row.push(' ');
 
-        if index % 50 == 49 {
+        if index % width == width - 1 {
             println!("{}", row);
             row.clear();
         }

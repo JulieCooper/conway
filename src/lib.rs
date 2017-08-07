@@ -1,3 +1,6 @@
+extern crate rand;
+use rand::Rng;
+
 #[derive(PartialEq, Clone)]
 pub enum CellState {
     Live,
@@ -8,6 +11,7 @@ pub enum CellState {
 pub struct Ruleset {
     pub neighbors: Vec<(i8, i8)>,
     pub rules: Box<FnMut(&CellState, &Vec<CellState>) -> CellState>,
+    pub init: Vec<(u64, u64)>,
 }
 pub struct Cell {
     xy: (u64, u64),
@@ -26,11 +30,6 @@ pub enum StepError {
     Reason2,
     Reason3,
 }
-struct CellTransition {
-    xy: (u64, u64),
-    old: CellState,
-    new: CellState,
-}
 pub struct StepResult {
     steps: u64,
     updated_cells: u64,
@@ -44,41 +43,61 @@ pub struct World {
 }
 impl World {
     pub fn new(w: u64, h: u64, ruleset: Ruleset) -> Self {
-
         //setup vector
         let mut grid = Vec::with_capacity(w as usize * h as usize);
 
         //populate grid
         for y in 0..h {
             for x in 0..w {
-                let cell = if y == 1 {
-                    Cell::new((x,y), CellState::Live)
-                } else {
-                    Cell::new((x,y), CellState::Dead)
+                //let cell = if y % 2 == 0 {
+                //    if x % 2 == 0 {
+                //        Cell::new((x,y), CellState::Live)
+                //    } else {
+                //        Cell::new((x,y), CellState::Dead)
+                //    }
+                //} else {
+                //    Cell::new((x,y), CellState::Dead)
+                //};
+                let mut rng = rand::thread_rng();
+                let rand_state = match rng.gen() {
+                    true => CellState::Live,
+                    false => CellState::Dead,
                 };
+                let cell = Cell::new((x,y), rand_state);
                 grid.push(cell);
+            }
+        }
+
+        let gen_index = |x, y| -> usize {
+            x as usize + y as usize * w as usize
+        };
+        for coord in ruleset.init.iter() {
+            match grid.get_mut(gen_index(coord.0, coord.1)) {
+                Some(cell) => {
+                    cell.state = CellState::Live;
+                },
+                None => panic!("invalid init coord"),
             }
         }
 
         World { grid: grid, width: w, height: h, time: 0, ruleset: ruleset }
     }
-    //pub fn set_rules<F>(&mut self, f: F)
-    //    where F: FnMut(Vec<CellState>) -> CellState + 'static {
-    //    self.ruleset = Box::new(f);
-    //}
+
     fn set_cell_state(&mut self, index: usize, new: CellState) {
         if let Some(cell) = self.grid.get_mut(index) {
             cell.set_state(new)
         }
     }
+
     fn get_cell_state(&self, xy: (u64, u64)) -> CellState {
-        let index = xy.0 + (self.width - 1) * xy.1;
+        let index = xy.0 + self.width * xy.1;
 
         match self.grid.get(index as usize) {
             Some(cell) => cell.state.clone(),
             None => CellState::OOB,
         }
     }
+
     fn get_neighbor_states(&self, xy: (u64, u64)) -> Vec<CellState> {
         let (x, y) = xy;
         self.ruleset.neighbors.iter().map(|rule| {
@@ -92,6 +111,7 @@ impl World {
             }
         }).collect::<Vec<_>>()
     }
+
     //map through all cells, applying ruleset and returning computed next grid state
     fn process_cells(&mut self) -> Vec<CellState> {
 
@@ -110,9 +130,7 @@ impl World {
 
         processed
     }
-    /*
-     * How to keep track of states, their behaviors, and transitions between states?
-     */
+
     fn apply_state_changes(&mut self, new_state: Vec<CellState>) -> StepResult {
         for (index, new) in new_state.into_iter().enumerate() {
             self.set_cell_state(index, new);
@@ -124,7 +142,7 @@ impl World {
     }
     pub fn step(&mut self) -> Result<StepResult, StepError> {
         //get list of state changes according to ruleset
-        let changes = self.process_cells(/*lambda to describe ruleset*/);
+        let changes = self.process_cells();
 
         //apply state changes to grid and return step statistics
         let sr = self.apply_state_changes(changes);
