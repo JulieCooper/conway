@@ -1,6 +1,8 @@
+extern crate ncurses;
+use ncurses::*;
 extern crate conway;
 use conway::World;
-use conway::{Cell, CellState, WorldOptions, InitialState};
+use conway::{Cell, CellState, WorldOptions, InitialState, Design};
 use std::{thread, time};
 
 fn main() {
@@ -31,33 +33,48 @@ fn main() {
     let options = WorldOptions {
         adj_cells: neighbors,
         rules: Box::new(rules),
-        init: InitialState::Ordered(init),
+        init: InitialState::Random,
     };
 
-    let width = 100;
-    let mut world = World::new(width, 20, options);
+    /* Start ncurses. */
+    initscr();
+    noecho();
+
+    let mut max_x = 0;
+    let mut max_y = 0;
+    getmaxyx(stdscr(), &mut max_y, &mut max_x);
+    let width = max_x as u64 / 2;
+    let height = max_y as u64;
+
+    let mut world = World::new(width, height, options);
+
+
+
 
     let run = true;
     while run {
-        display_grid(world.return_grid(), width as usize);
+        clear();
+        display_grid(world.return_grid(), max_x as usize);
+        refresh();
         world.step();
-        thread::sleep(time::Duration::from_millis(200));
+        thread::sleep(time::Duration::from_millis(100));
     }
+
+    endwin();
 }
 
 fn display_grid(grid: &Vec<Cell>, width: usize) {
     let mut row = String::new();
-    println!("-----");
     for (index, cell) in grid.iter().enumerate() {
         if let CellState::Dead = cell.state {
             row.push(' ');
         } else {
-            row.push('x');
+            row.push('o');
         }
         row.push(' ');
 
         if index % width == width - 1 {
-            println!("{}", row);
+            printw(&row.to_string());
             row.clear();
         }
     }

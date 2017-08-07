@@ -66,11 +66,10 @@ impl World {
             }
         }
 
-    //Random,
-    //Blank,
-    //Ordered(Vec<(u64, u64, CellState)>),
-    //Preconstructed(Design),
-    //Lambda,
+        //lambda for generating index from x, y coordinates
+        let gen_index = |x, y| -> usize {
+            x as usize + y as usize * w as usize
+        };
         //match init option and `make it so`
         match options.init {
             InitialState::Random => {
@@ -84,9 +83,6 @@ impl World {
             },
             InitialState::Blank => (),
             InitialState::Ordered(ref coords) => {
-                let gen_index = |x, y| -> usize {
-                    x as usize + y as usize * w as usize
-                };
                 for coord in coords.iter() {
                     match grid.get_mut(gen_index(coord.0, coord.1)) {
                         Some(cell) => {
@@ -97,7 +93,24 @@ impl World {
                 }
             },
             InitialState::Preconstructed(ref design) => {
-                ()
+                match design {
+                    &Design::Horizontal_Lines => {
+                        for x in 0..w {
+                            for y in 0..h {
+                                if y % 2 == 0 {
+                                    match grid.get_mut(gen_index(x, y)) {
+                                        Some(cell) => {
+                                            cell.set_state(CellState::Live);
+                                        },
+                                        None => panic!("invalid preconstructed coord"),
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    &Design::Vertical_Lines => {
+                    },
+                }
             },
             InitialState::Lambda => (),
         }

@@ -1,0 +1,8 @@
+[package]
+name = "cli-user"
+version = "0.1.0"
+authoers = ["Jeremy Cooper <jeremydezmond@gmail.com>"]
+
+[dependencies]
+conway = { path = ".." }
+ncurses = "5.86.0"
