@@ -1,11 +1,11 @@
 extern crate conway;
 use conway::World;
-use conway::{Cell, CellState, Ruleset};
+use conway::{Cell, CellState, WorldOptions, InitialState};
 use std::{thread, time};
 
 fn main() {
-    let init = vec![
-        //(2, 1), (1, 3), (2, 3), (3, 3), (3, 2)
+    let mut init = vec![
+        (2, 1), (1, 3), (2, 3), (3, 3), (3, 2)
     ];
     let neighbors = vec![
         (-1,-1), (0,-1), (1,-1),
@@ -28,14 +28,14 @@ fn main() {
                 }
             }
         };
-    let ruleset = Ruleset {
-        neighbors: neighbors,
+    let options = WorldOptions {
+        adj_cells: neighbors,
         rules: Box::new(rules),
-        init: init,
+        init: InitialState::Ordered(init),
     };
 
     let width = 100;
-    let mut world = World::new(width, 20, ruleset);
+    let mut world = World::new(width, 20, options);
 
     let run = true;
     while run {

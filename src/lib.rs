@@ -8,10 +8,22 @@ pub enum CellState {
     Other,
     OOB,
 }
-pub struct Ruleset {
-    pub neighbors: Vec<(i8, i8)>,
+pub enum Design {
+    Horizontal_Lines,
+    Vertical_Lines,
+}
+pub enum InitialState {
+    Random,
+    Blank,
+    Ordered(Vec<(u64, u64)>),
+    Preconstructed(Design),
+    Lambda,
+}
+
+pub struct WorldOptions {
+    pub adj_cells: Vec<(i8, i8)>,
     pub rules: Box<FnMut(&CellState, &Vec<CellState>) -> CellState>,
-    pub init: Vec<(u64, u64)>,
+    pub init: InitialState,
 }
 pub struct Cell {
     xy: (u64, u64),
@@ -39,48 +51,58 @@ pub struct World {
     width: u64,
     height: u64,
     grid: Vec<Cell>,
-    ruleset: Ruleset,
+    options: WorldOptions,
 }
 impl World {
-    pub fn new(w: u64, h: u64, ruleset: Ruleset) -> Self {
+    pub fn new(w: u64, h: u64, options: WorldOptions) -> Self {
         //setup vector
         let mut grid = Vec::with_capacity(w as usize * h as usize);
 
-        //populate grid
+        //populate grid with Dead cells
         for y in 0..h {
             for x in 0..w {
-                //let cell = if y % 2 == 0 {
-                //    if x % 2 == 0 {
-                //        Cell::new((x,y), CellState::Live)
-                //    } else {
-                //        Cell::new((x,y), CellState::Dead)
-                //    }
-                //} else {
-                //    Cell::new((x,y), CellState::Dead)
-                //};
-                let mut rng = rand::thread_rng();
-                let rand_state = match rng.gen() {
-                    true => CellState::Live,
-                    false => CellState::Dead,
-                };
-                let cell = Cell::new((x,y), rand_state);
+                let cell = Cell::new((x,y), CellState::Dead);
                 grid.push(cell);
             }
         }
 
-        let gen_index = |x, y| -> usize {
-            x as usize + y as usize * w as usize
-        };
-        for coord in ruleset.init.iter() {
-            match grid.get_mut(gen_index(coord.0, coord.1)) {
-                Some(cell) => {
-                    cell.state = CellState::Live;
-                },
-                None => panic!("invalid init coord"),
-            }
+    //Random,
+    //Blank,
+    //Ordered(Vec<(u64, u64, CellState)>),
+    //Preconstructed(Design),
+    //Lambda,
+        //match init option and `make it so`
+        match options.init {
+            InitialState::Random => {
+                let mut rng = rand::thread_rng();
+                for mut cell in grid.iter_mut() {
+                    let rand_state = match rng.gen() {
+                        true => cell.set_state(CellState::Live),
+                        false => cell.set_state(CellState::Dead),
+                    };
+                }
+            },
+            InitialState::Blank => (),
+            InitialState::Ordered(ref coords) => {
+                let gen_index = |x, y| -> usize {
+                    x as usize + y as usize * w as usize
+                };
+                for coord in coords.iter() {
+                    match grid.get_mut(gen_index(coord.0, coord.1)) {
+                        Some(cell) => {
+                            cell.set_state(CellState::Live);
+                        },
+                        None => panic!("invalid init coord"),
+                    }
+                }
+            },
+            InitialState::Preconstructed(ref design) => {
+                ()
+            },
+            InitialState::Lambda => (),
         }
 
-        World { grid: grid, width: w, height: h, time: 0, ruleset: ruleset }
+        World { grid: grid, width: w, height: h, time: 0, options: options }
     }
 
     fn set_cell_state(&mut self, index: usize, new: CellState) {
@@ -100,7 +122,7 @@ impl World {
 
     fn get_neighbor_states(&self, xy: (u64, u64)) -> Vec<CellState> {
         let (x, y) = xy;
-        self.ruleset.neighbors.iter().map(|rule| {
+        self.options.adj_cells.iter().map(|rule| {
             let x = x as i64 + rule.0 as i64;
             let y = y as i64 + rule.1 as i64;
             if (x < 0) | (y < 0) {
@@ -112,7 +134,7 @@ impl World {
         }).collect::<Vec<_>>()
     }
 
-    //map through all cells, applying ruleset and returning computed next grid state
+    //map through all cells, applying rules and returning computed next grid state
     fn process_cells(&mut self) -> Vec<CellState> {
 
         let mut neighbor_states = Vec::new();
@@ -123,7 +145,7 @@ impl World {
         for (index, cell) in self.grid.iter().enumerate() {
             if let Some(states) = neighbor_states.get(index) {
                 processed.push(
-                    (self.ruleset.rules)(&cell.state, states)
+                    (self.options.rules)(&cell.state, states)
                 );
             }
         }
@@ -141,7 +163,7 @@ impl World {
         }
     }
     pub fn step(&mut self) -> Result<StepResult, StepError> {
-        //get list of state changes according to ruleset
+        //get list of state changes according to rules
         let changes = self.process_cells();
 
         //apply state changes to grid and return step statistics
