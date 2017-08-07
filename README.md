@@ -2,7 +2,7 @@
 Grid based simulation in rust  
   
 This is an attempt to
-* Implement an understood and pre-existing programme in idiomatic rust style 
+* Implement an understood and pre-existing program in idiomatic rust style 
 * Provide neighbor-determination and state change conditions as abstractions through closures
 * Experiment with animation techniques
 
