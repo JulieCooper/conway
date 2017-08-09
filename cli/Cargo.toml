@@ -1,0 +1,8 @@
+[package]
+name = "conway-cli"
+version = "0.1.0"
+author = "daemoz"
+
+[dependencies]
+conway = { path = ".." }
+ncurses = "5.86.0"
