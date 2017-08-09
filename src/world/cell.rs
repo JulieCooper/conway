@@ -2,7 +2,7 @@
 pub enum CellState {
     Live,
     Dead,
-    Other,
+    Uninitialized,
     OOB,
 }
 pub struct Cell {

@@ -1,87 +1,62 @@
 pub mod cell;
 use self::cell::{Cell, CellState};
 pub mod builder;
-use self::builder::*;
+use self::builder::{InitialState, WorldBuilder};
+use self::builder::designs::*;
 pub mod types;
 use self::types::{StepResult, StepError};
-extern crate rand;
-use rand::Rng;
+pub mod rules;
+use self::rules::*;
+extern crate ncurses;
+use world::ncurses::stdscr;
+use world::ncurses::getmaxyx;
 
+pub enum Dims {
+    Custom(u64, u64),
+    Auto,
+}
 pub struct WorldOptions {
-    pub input_cells: Vec<(i8, i8)>,
-    pub rules: Box<FnMut(&CellState, &Vec<CellState>) -> CellState>,
+    pub width_height: Dims,
     pub init: InitialState,
+    pub ruleset: Option<Ruleset>,
 }
 pub struct World {
     time: u64,
     width: u64,
     height: u64,
     grid: Vec<Cell>,
-    options: WorldOptions,
+    ruleset: Ruleset,
 }
 impl World {
-    pub fn new(w: u64, h: u64, options: WorldOptions) -> Self {
+    pub fn new(options: WorldOptions) -> Self {
+        let (w, h) = match options.width_height {
+            Dims::Custom(w, h) => (w, h),
+            Dims::Auto => {
+                let mut max_x = 0;
+                let mut max_y = 0;
+                getmaxyx(stdscr(), &mut max_y, &mut max_x);
+
+                (max_x as u64 / 2, max_y as u64)
+            },
+        };
+
         //setup vector
         let mut grid = Vec::with_capacity(w as usize * h as usize);
 
-        //populate grid with Dead cells
-        for y in 0..h {
-            for x in 0..w {
-                let cell = Cell::new((x,y), CellState::Dead);
-                grid.push(cell);
-            }
-        }
+        //create WorldBuilder object
+        let mut wb = WorldBuilder::new(w, h, options.init);
+        
+        //build world
+        wb.build(&mut grid);
 
-        //lambda for generating index from x, y coordinates
-        let gen_index = |x, y| -> usize {
-            x as usize + y as usize * w as usize
-        };
-        //match init option and `make it so`
-        match options.init {
-            InitialState::Random => {
-                let mut rng = rand::thread_rng();
-                for mut cell in grid.iter_mut() {
-                    let rand_state = match rng.gen() {
-                        true => cell.set_state(CellState::Live),
-                        false => cell.set_state(CellState::Dead),
-                    };
-                }
-            },
-            InitialState::Blank => (),
-            InitialState::Ordered(ref coords) => {
-                for coord in coords.iter() {
-                    match grid.get_mut(gen_index(coord.0, coord.1)) {
-                        Some(cell) => {
-                            cell.set_state(CellState::Live);
-                        },
-                        None => panic!("invalid init coord"),
-                    }
-                }
-            },
-            InitialState::Preconstructed(ref design) => {
-                match design {
-                    &Design::Horizontal_Lines => {
-                        for x in 0..w {
-                            for y in 0..h {
-                                if y % 2 == 0 {
-                                    match grid.get_mut(gen_index(x, y)) {
-                                        Some(cell) => {
-                                            cell.set_state(CellState::Live);
-                                        },
-                                        None => panic!("invalid preconstructed coord"),
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    &Design::Vertical_Lines => {
-                    },
-                }
-            },
-            InitialState::Lambda => (),
-        }
+        let ruleset = options.ruleset;
 
-        World { grid: grid, width: w, height: h, time: 0, options: options }
+        World {
+            time: 0,
+            width: w, height: h,
+            grid: grid,
+            ruleset: ruleset.unwrap(),
+        }
     }
 
     fn set_cell_state(&mut self, index: usize, new: CellState) {
@@ -101,7 +76,7 @@ impl World {
 
     fn get_neighbor_states(&self, xy: (u64, u64)) -> Vec<CellState> {
         let (x, y) = xy;
-        self.options.input_cells.iter().map(|rule| {
+        self.ruleset.input_cells.get_data().iter().map(|rule| {
             let x = x as i64 + rule.0 as i64;
             let y = y as i64 + rule.1 as i64;
             if (x < 0) | (y < 0) {
@@ -124,7 +99,7 @@ impl World {
         for (index, cell) in self.grid.iter().enumerate() {
             if let Some(states) = neighbor_states.get(index) {
                 processed.push(
-                    (self.options.rules)(&cell.get_state(), states)
+                    (self.ruleset.rules)(&cell.get_state(), states)
                 );
             }
         }
@@ -152,5 +127,8 @@ impl World {
     }
     pub fn return_grid(&self) -> &Vec<Cell> {
         &self.grid
+    }
+    pub fn return_width(&self) -> usize {
+        self.width as usize
     }
 }
