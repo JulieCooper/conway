@@ -1,5 +1,5 @@
 pub mod input_cells;
-use self::input_cells::Input_Cells;
+use self::input_cells::InputCells;
 use world::CellState;
 use std::collections::HashMap;
 use std::collections::hash_map::Entry::{Vacant, Occupied};
@@ -10,8 +10,8 @@ pub enum Rulesets {
     Conway,
 }
 pub struct Ruleset {
-    pub input_cells: Input_Cells,
-    pub rules: Rulesets,//Box<FnMut(&CellState, &Vec<CellState>) -> CellState>,
+    pub input_cells: InputCells,
+    pub rules: Rulesets,
 }
 impl Rulesets {
     pub fn get_data(&self) -> DSL_Ruleset {
@@ -47,25 +47,30 @@ impl DSL_Ruleset {
     pub fn add_cases(&mut self,
                  identity_state: CellState,
                  for_state: CellState,
-                 cases: Vec<(usize, CellState)>) {
+                 cases: Vec<(usize, CellState)>)
+    {
         let key = (identity_state, for_state);
 
         self.data.insert(key, cases);
     }
-    //figure out how to use references here.......
     pub fn compute(&mut self,
                identity_state: CellState,
-               input_states: Vec<(CellState, usize)>) -> CellState {
+               input_states: Vec<(CellState, usize)>)
+        -> CellState {
+
         let mut return_state = identity_state.clone();
-        for state_amount in input_states.iter() {
-            //key = (my_state, for_state)
-            let key = (identity_state.clone(), state_amount.0.clone());
+
+        let mut key = (identity_state, CellState::Uninitialized);
+        //loop through list of amounts of each state from neighbor states
+        for &(ref state, ref amt) in input_states.iter() {
+            //reuse identity_state
+            key.1 = state.clone();
+
             match self.data.get(&key) {
-                //Vec<(usize, CellState)>
                 Some(vec) => {
-                    for rule in vec {
-                        if rule.0 == state_amount.1 {
-                            return_state = rule.1.clone();
+                    for &(ref trigger_amt, ref result_state) in vec {
+                        if trigger_amt == amt {
+                            return_state = result_state.clone();
                         }
                     }
                 },

@@ -11,4 +11,4 @@ The engine happens to default to Conway's Game of Life.
 
 ---
 ## Installation/Compilation notes
-Currently there are no external dependencies and everything should compile under the latest nightly.
+Everything should compile under the latest nightly.

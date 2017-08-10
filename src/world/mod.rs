@@ -2,24 +2,23 @@ pub mod cell;
 use self::cell::{Cell, CellState};
 pub mod builder;
 use self::builder::{InitialState, WorldBuilder};
-use self::builder::designs::*;
-pub mod types;
-use self::types::{StepResult, StepError};
+pub mod return_types;
+use self::return_types::{StepResult, StepError};
 pub mod rules;
 use self::rules::{DSL_Ruleset, Rulesets};
-use self::rules::input_cells::Input_Cells;
+use self::rules::input_cells::InputCells;
 extern crate ncurses;
 use world::ncurses::stdscr;
 use world::ncurses::getmaxyx;
 
-pub enum Dims {
+pub enum Dimensions {
     Custom(u64, u64),
     Auto,
 }
-pub struct WorldOptions {
-    pub width_height: Dims,
+pub struct World_Options {
+    pub width_height: Dimensions,
     pub init: InitialState,
-    pub input_cells: Input_Cells,
+    pub input_cells: InputCells,
     pub rules: Rulesets,
 }
 pub struct World {
@@ -27,14 +26,14 @@ pub struct World {
     width: u64,
     height: u64,
     grid: Vec<Cell>,
-    input_cells: Input_Cells,
+    input_cells: InputCells,
     rules: DSL_Ruleset,
 }
 impl World {
-    pub fn new(options: WorldOptions) -> Self {
+    pub fn new(options: World_Options) -> Self {
         let (w, h) = match options.width_height {
-            Dims::Custom(w, h) => (w, h),
-            Dims::Auto => {
+            Dimensions::Custom(w, h) => (w, h),
+            Dimensions::Auto => {
                 let mut max_x = 0;
                 let mut max_y = 0;
                 getmaxyx(stdscr(), &mut max_y, &mut max_x);
@@ -122,6 +121,7 @@ impl World {
         processed
     }
 
+    //appy changes produced by process_cells() and return statistics
     fn apply_state_changes(&mut self, new_state: Vec<CellState>) -> StepResult {
         for (index, new) in new_state.into_iter().enumerate() {
             self.set_cell_state(index, new);

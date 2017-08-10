@@ -80,11 +80,6 @@ impl WorldBuilder {
         }
     }
     fn populate_library(&self, grid_ref: &mut Vec<Cell>, design: &Design) {
-        //1. generate Vec<(u64, u64)> from storage.
-        //2. pass that vec to populate_ordered()
-        //
-        //?. from data in binary or from external config?
-        //?. possibility for other CellState(s)
         let data = design.get_data();
         self.populate_ordered(grid_ref, &data);
     }

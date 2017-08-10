@@ -1,13 +1,13 @@
 extern crate ncurses;
-use ncurses::*;
+use ncurses::{initscr, noecho, clear, refresh, printw, endwin};
 extern crate conway;
-use conway::world::types::{StepError, StepResult};
+use conway::world::return_types::{StepError, StepResult};
 use conway::world::cell::{Cell, CellState};
 use conway::world::builder::InitialState;
 use conway::world::builder::designs::Design;
-use conway::world::{World, Dims, WorldOptions};
+use conway::world::{World, Dimensions, World_Options};
 use conway::world::rules::{Ruleset, Rulesets};
-use conway::world::rules::input_cells::Input_Cells;
+use conway::world::rules::input_cells::InputCells;
 use std::{thread, time};
 
 fn main() {
@@ -15,15 +15,15 @@ fn main() {
     initscr();
     noecho();
 
-    let options = WorldOptions {
-        width_height: Dims::Auto,
-        init: InitialState::Random,//Library(Design::Eureka),
-        input_cells: Input_Cells::Neighbors,
+    let world_options = World_Options {
+        width_height: Dimensions::Auto,
+        init: InitialState::Library(Design::Eureka),
+        input_cells: InputCells::Neighbors,
         rules: Rulesets::Conway,
     };
 
     //create world
-    let mut world = World::new(options);
+    let mut world = World::new(world_options);
 
     //main loop
     let run = true;
@@ -32,7 +32,7 @@ fn main() {
         display_grid(world.return_grid(), world.return_width());
         refresh();
         world.step();
-        thread::sleep(time::Duration::from_millis(50));
+        thread::sleep(time::Duration::from_millis(200));
     }
 
     //cleanup
