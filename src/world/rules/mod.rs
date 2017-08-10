@@ -2,23 +2,28 @@ pub mod input_cells;
 use self::input_cells::Input_Cells;
 use world::CellState;
 use std::collections::HashMap;
+use std::collections::hash_map::Entry::{Vacant, Occupied};
 
-type Ruleset_Type = HashMap<(CellState, CellState), Vec<(u8, CellState)>>;
+type Ruleset_Type = HashMap<(CellState, CellState), Vec<(usize, CellState)>>;
 pub enum Rulesets {
     Custom,
     Conway,
 }
+pub struct Ruleset {
+    pub input_cells: Input_Cells,
+    pub rules: Rulesets,//Box<FnMut(&CellState, &Vec<CellState>) -> CellState>,
+}
 impl Rulesets {
-    fn get_data(&self) -> DSL_Ruleset {
+    pub fn get_data(&self) -> DSL_Ruleset {
         use self::CellState::{Dead, Live};
-        match self {
+        match *self {
             //Custom will use yet-formalized DSL that will be used for config files
-            Custom => {
+            Rulesets::Custom => {
                 let mut ruleset = DSL_Ruleset::new();
                 ruleset.add_cases(Dead, Live, vec![(3, Live)]);
                 ruleset
             },
-            Conway => {
+            Rulesets::Conway => {
                 let mut ruleset = DSL_Ruleset::new();
                 ruleset.add_cases(Dead, Live, vec![(3, Live)]);
                 ruleset.add_cases(Live, Live, vec![
@@ -42,29 +47,25 @@ impl DSL_Ruleset {
     pub fn add_cases(&mut self,
                  identity_state: CellState,
                  for_state: CellState,
-                 cases: Vec<(u8, CellState)>) {
+                 cases: Vec<(usize, CellState)>) {
         let key = (identity_state, for_state);
 
         self.data.insert(key, cases);
     }
     //figure out how to use references here.......
-    fn compute(&mut self,
+    pub fn compute(&mut self,
                identity_state: CellState,
-               input_states: Vec<(CellState, u8)>) -> CellState {
-        use self::CellState::{Dead, Live};
-        //let mut ruleset = DSL_Ruleset::new();
-
-        //ruleset.add_cases(Dead, Live, vec![(3, Live)]);
-        self.add_cases(Dead, Live, vec![(3, Live)]);
-
+               input_states: Vec<(CellState, usize)>) -> CellState {
         let mut return_state = identity_state.clone();
-        for input_state in input_states.iter() {
-            let key = (identity_state.clone(), input_state.0.clone());
+        for state_amount in input_states.iter() {
+            //key = (my_state, for_state)
+            let key = (identity_state.clone(), state_amount.0.clone());
             match self.data.get(&key) {
+                //Vec<(usize, CellState)>
                 Some(vec) => {
-                    for rule_state in vec {
-                        if rule_state.0 == input_state.1 {
-                            return_state = rule_state.1.clone();
+                    for rule in vec {
+                        if rule.0 == state_amount.1 {
+                            return_state = rule.1.clone();
                         }
                     }
                 },
@@ -74,18 +75,4 @@ impl DSL_Ruleset {
 
         return_state
     }
-}
-pub enum Cell_Rules {
-    Conway,
-}
-impl Cell_Rules {
-    fn get_data(&self) -> () {
-        match *self {
-            Cell_Rules::Conway => (),
-        }
-    }
-}
-pub struct Ruleset {
-    pub input_cells: Input_Cells,
-    pub rules: Box<FnMut(&CellState, &Vec<CellState>) -> CellState>,
 }

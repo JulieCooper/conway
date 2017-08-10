@@ -11,42 +11,15 @@ use conway::world::rules::input_cells::Input_Cells;
 use std::{thread, time};
 
 fn main() {
-    /* Conway DSL:
-     * (Dead, (Live (3 Live)))
-     * (Live, (Live (..1 Dead)
-     *              (4.. Dead)))
-     */
-    let conway =
-        |state: &CellState, adj_states: &Vec<CellState>| {
-            if let &CellState::Dead = state {
-                match adj_states.iter().filter(|x| x == &&CellState::Live).count() {
-                    3 => CellState::Live,
-                    _ => CellState::Dead,
-                }
-            } else {
-                match adj_states.iter().filter(|x| x == &&CellState::Live).count() {
-                    0 | 1 => CellState::Dead,
-                    2 | 3 => CellState::Live,
-                    4...9 => CellState::Dead,
-                    _ => CellState::Uninitialized,
-                }
-            }
-        };
-
     //setup ncurses
     initscr();
     noecho();
 
-    //create ruleset object
-    let ruleset = Ruleset {
-        input_cells: Input_Cells::Neighbors,
-        rules: Box::new(conway),
-    };
-
     let options = WorldOptions {
         width_height: Dims::Auto,
         init: InitialState::Random,//Library(Design::Eureka),
-        ruleset: Some(ruleset),
+        input_cells: Input_Cells::Neighbors,
+        rules: Rulesets::Conway,
     };
 
     //create world

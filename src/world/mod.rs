@@ -6,7 +6,8 @@ use self::builder::designs::*;
 pub mod types;
 use self::types::{StepResult, StepError};
 pub mod rules;
-use self::rules::*;
+use self::rules::{DSL_Ruleset, Rulesets};
+use self::rules::input_cells::Input_Cells;
 extern crate ncurses;
 use world::ncurses::stdscr;
 use world::ncurses::getmaxyx;
@@ -18,14 +19,16 @@ pub enum Dims {
 pub struct WorldOptions {
     pub width_height: Dims,
     pub init: InitialState,
-    pub ruleset: Option<Ruleset>,
+    pub input_cells: Input_Cells,
+    pub rules: Rulesets,
 }
 pub struct World {
     time: u64,
     width: u64,
     height: u64,
     grid: Vec<Cell>,
-    ruleset: Ruleset,
+    input_cells: Input_Cells,
+    rules: DSL_Ruleset,
 }
 impl World {
     pub fn new(options: WorldOptions) -> Self {
@@ -49,13 +52,14 @@ impl World {
         //build world
         wb.build(&mut grid);
 
-        let ruleset = options.ruleset;
+        let rules = options.rules.get_data();
 
         World {
             time: 0,
             width: w, height: h,
             grid: grid,
-            ruleset: ruleset.unwrap(),
+            input_cells: options.input_cells,
+            rules: rules,
         }
     }
 
@@ -74,18 +78,29 @@ impl World {
         }
     }
 
-    fn get_neighbor_states(&self, xy: (u64, u64)) -> Vec<CellState> {
+    fn get_neighbor_states(&self, xy: (u64, u64)) -> Vec<(CellState, usize)> {
         let (x, y) = xy;
-        self.ruleset.input_cells.get_data().iter().map(|rule| {
+        //get neighbor states
+        let neighbor_states = self.input_cells.get_data().iter().map(|rule| {
             let x = x as i64 + rule.0 as i64;
             let y = y as i64 + rule.1 as i64;
-            if (x < 0) | (y < 0) {
+            if (x < 0) | (y < 0) | (x > self.width as i64) | (y > self.height as i64) {
                 CellState::OOB
             } else {
                 let coords = (x as u64, y as u64);
                 self.get_cell_state(coords)
             }
-        }).collect::<Vec<_>>()
+        }).collect::<Vec<_>>();
+
+        //format neighbor states for input to ruleset (Amount, ResultState)
+        let mut output_vector = Vec::new();
+        use self::cell::CellState::{Dead, Live, OOB, Uninitialized};
+        for state in vec![Dead, Live].iter() {
+            let num = neighbor_states.iter().filter(|x| x == &state).count();
+            output_vector.push( (state.clone(), num) );
+        }
+
+        output_vector
     }
 
     //map through all cells, applying rules and returning computed next grid state
@@ -97,9 +112,9 @@ impl World {
         }
         let mut processed = Vec::new();
         for (index, cell) in self.grid.iter().enumerate() {
-            if let Some(states) = neighbor_states.get(index) {
+            if let Some(nb_states) = neighbor_states.get(index) {
                 processed.push(
-                    (self.ruleset.rules)(&cell.get_state(), states)
+                    self.rules.compute(cell.get_state().clone(), nb_states.clone())
                 );
             }
         }
