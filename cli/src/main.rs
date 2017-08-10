@@ -6,7 +6,8 @@ use conway::world::cell::{Cell, CellState};
 use conway::world::builder::InitialState;
 use conway::world::builder::designs::Design;
 use conway::world::{World, Dims, WorldOptions};
-use conway::world::rules::*;
+use conway::world::rules::{Ruleset, Rulesets};
+use conway::world::rules::input_cells::Input_Cells;
 use std::{thread, time};
 
 fn main() {
@@ -44,7 +45,7 @@ fn main() {
 
     let options = WorldOptions {
         width_height: Dims::Auto,
-        init: InitialState::Library(Design::LWSS),
+        init: InitialState::Random,//Library(Design::Eureka),
         ruleset: Some(ruleset),
     };
 
@@ -71,7 +72,7 @@ fn display_grid(grid: &Vec<Cell>, width: usize) {
         if let &CellState::Dead = cell.get_state() {
             row.push(' ');
         } else {
-            row.push('0');
+            row.push('o');
         }
 
         if index % width == width - 1 {

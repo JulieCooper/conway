@@ -1,6 +1,3 @@
-use world::CellState;
-pub enum Cell_Rules {
-}
 pub enum Input_Cells {
     Custom(Vec<(i8, i8)>),
     Neighbors,
@@ -64,8 +61,4 @@ impl Input_Cells {
             Input_Cells::Custom(ref coords) => coords.clone(),
         }
     }
-}
-pub struct Ruleset {
-    pub input_cells: Input_Cells,
-    pub rules: Box<FnMut(&CellState, &Vec<CellState>) -> CellState>,
 }

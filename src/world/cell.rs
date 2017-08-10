@@ -1,4 +1,4 @@
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub enum CellState {
     Live,
     Dead,
