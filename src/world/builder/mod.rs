@@ -11,6 +11,7 @@ pub enum InitialState {
     Library(Design),
     //Lambda(Box<FnMut(&Cell)->CellState>),
     Lambda,
+    //random_from_library
 }
 pub struct WorldBuilder {
     width: u64,

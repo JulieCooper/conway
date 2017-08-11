@@ -8,6 +8,7 @@ type Ruleset_Type = HashMap<(CellState, CellState), Vec<(usize, CellState)>>;
 pub enum Rulesets {
     Custom,
     Conway,
+    ConwayEasy,
 }
 pub struct Ruleset {
     pub input_cells: InputCells,
@@ -21,6 +22,15 @@ impl Rulesets {
             Rulesets::Custom => {
                 let mut ruleset = DSL_Ruleset::new();
                 ruleset.add_cases(Dead, Live, vec![(3, Live)]);
+                ruleset
+            },
+            Rulesets::ConwayEasy => {
+                let mut ruleset = DSL_Ruleset::new();
+                ruleset.add_cases(Dead, Live, vec![(3, Live)]);
+                ruleset.add_cases(Live, Live, vec![
+                    (0, Dead), (1, Dead), (4, Dead), (5, Dead),
+                    (6, Dead), (7, Live), (8, Dead), (9, Dead),
+                ]);
                 ruleset
             },
             Rulesets::Conway => {

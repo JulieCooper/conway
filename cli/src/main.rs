@@ -8,16 +8,31 @@ use conway::world::builder::designs::Design;
 use conway::world::{World, Dimensions, World_Options};
 use conway::world::rules::{Ruleset, Rulesets};
 use conway::world::rules::input_cells::InputCells;
-use std::{thread, time};
+use std::{thread, time, env, process};
+use std::io::prelude::*;
+mod config;
+use config::Config;
 
 fn main() {
+    //prepare error stream
+    let mut stderr = std::io::stderr();
+
+    let config = Config::new(env::args()).unwrap_or_else(|err| {
+        writeln!(
+            &mut stderr,
+            "Problem {}",
+            err
+        ).expect("Could not write to stderr");
+        process::exit(1);
+    });
+
     //setup ncurses
     initscr();
     noecho();
 
     let world_options = World_Options {
         width_height: Dimensions::Auto,
-        init: InitialState::Library(Design::Eureka),
+        init: InitialState::Random,//Library(Design::Eureka),
         input_cells: InputCells::Neighbors,
         rules: Rulesets::Conway,
     };
@@ -32,7 +47,7 @@ fn main() {
         display_grid(world.return_grid(), world.return_width());
         refresh();
         world.step();
-        thread::sleep(time::Duration::from_millis(200));
+        thread::sleep(time::Duration::from_millis(50));
     }
 
     //cleanup
