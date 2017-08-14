@@ -7,16 +7,9 @@ use self::return_types::{StepResult, StepError};
 pub mod rules;
 use self::rules::{DSL_Ruleset, Rulesets};
 use self::rules::input_cells::InputCells;
-extern crate ncurses;
-use world::ncurses::stdscr;
-use world::ncurses::getmaxyx;
 
-pub enum Dimensions {
-    Custom(u64, u64),
-    Auto,
-}
 pub struct World_Options {
-    pub width_height: Dimensions,
+    pub width_height: (u64, u64),
     pub init: InitialState,
     pub input_cells: InputCells,
     pub rules: Rulesets,
@@ -31,16 +24,7 @@ pub struct World {
 }
 impl World {
     pub fn new(options: World_Options) -> Self {
-        let (w, h) = match options.width_height {
-            Dimensions::Custom(w, h) => (w, h),
-            Dimensions::Auto => {
-                let mut max_x = 0;
-                let mut max_y = 0;
-                getmaxyx(stdscr(), &mut max_y, &mut max_x);
-
-                (max_x as u64 / 2, max_y as u64)
-            },
-        };
+        let (w, h) = options.width_height;
 
         //setup vector
         let mut grid = Vec::with_capacity(w as usize * h as usize);

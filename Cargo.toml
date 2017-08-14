@@ -6,6 +6,7 @@ authors = ["daemoz"]
 [dependencies]
 rand = "0.3.15"
 ncurses = { version = "5.86.0", optional = true }
+argparse = { version = "*", optional = true }
 
 [[bin]]
 name = "conway-cli"
@@ -13,4 +14,4 @@ path = "cli/src/main.rs"
 required-features = ["binaries"]
 
 [features]
-binaries = ["ncurses"]
+binaries = ["ncurses", "argparse"]

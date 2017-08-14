@@ -1,3 +1,8 @@
+extern crate argparse;
+use argparse::{ArgumentParser, StoreTrue, Store};
+use conway::world::World_Options;
+use conway::world::builder::InitialState;
+use conway::world::rules::input_cells::InputCells;
 use std::env;
 use std::error::Error;
 //use std::fs::File;
@@ -5,26 +10,29 @@ use std::io::prelude::*;
 
 pub struct Config {
     //* array of cellstate display chars
+    pub alive_char: char,
+    pub dead_char: char,
+    pub output_file: String,
     pub initial_state: String,
-    pub input_cell_pattern: String,
+    pub adjacent_rules: String,
     pub ruleset: String,
-    pub dimensions: (u64, u64),
     pub delay: u8,
-    //pub output-file: String
+    pub width: u64,
+    pub height: u64,
 }
 impl Config {
-    pub fn new(mut args: env::Args) -> Result<Config, &'static str> {
-        args.next();
-
-        for arg in args.next() {
+    fn parse_initial_state(x: String) -> InitialState {
+        match Some(&*x.to_string()) {
+            Some("Random") => InitialState::Random,
         }
-
-        Ok(Config {
-            initial_state: String::new(),
-            input_cell_pattern: String::new(),
-            ruleset: String::new(),
-            dimensions: (0, 0),
-            delay: 50,
-        })
+    }
+    fn parse_adjacent_rules(x: String) -> InputCells {
+    }
+    pub fn return_options(&self) -> World_Options {
+        World_Options {
+            width_height: (self.width, self.height),
+            init: Config::parse_initial_state(self.initial_state),
+            input_cells: Config::parse_adjacent_rules(self.adjacent_rules),
+        }
     }
 }
