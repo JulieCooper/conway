@@ -12,6 +12,8 @@ use conway::world::rules::{Ruleset, Rulesets};
 use conway::world::rules::input_cells::InputCells;
 mod config;
 use config::Config;
+mod display;
+use display::Renderer;
 use std::{thread, time, env, process};
 use std::io::prelude::*;
 
@@ -62,7 +64,7 @@ fn main() {
             .add_option(&["-o", "--output-file"], Store,
                         "File for debug output");
         ap.refer(&mut config.initial_state)
-            .add_option(&["-i", "--initial-state"], Store,
+            .add_option(&["-i", "--init"], Store,
                         "Initial grid state");
         ap.refer(&mut config.adjacent_rules)
             .add_option(&["-a", "--adjacent-rules"], Store,
@@ -75,57 +77,29 @@ fn main() {
                         "Delay between ticks");
         ap.parse_args();
     }
-    println!("--alive-char: {}", config.alive_char);
-    println!("--dead-char: {}", config.dead_char);
-    println!("--debug-output: {}", config.output_file);
-    println!("--initial-state: {}", config.initial_state);
-    println!("--adjacent-rules: {}", config.adjacent_rules);
-    println!("--ruleset: {}", config.ruleset);
-    println!("--delay: {}", config.delay);
-
+    //println!("--alive-char: {}", config.alive_char);
+    //println!("--dead-char: {}", config.dead_char);
+    //println!("--debug-output: {}", config.output_file);
+    //println!("--initial-state: {}", config.initial_state);
+    //println!("--adjacent-rules: {}", config.adjacent_rules);
+    //println!("--ruleset: {}", config.ruleset);
+    //println!("--delay: {}", config.delay);
 
     let world_options = config.return_options();
-    //let world_options = World_Options {
-    //    width_height: max_xy,
-    //    init: InitialState::Random,//Library(Design::Eureka),
-    //    input_cells: InputCells::Neighbors,
-    //    rules: Rulesets::ConwayEasy,
-    //};
 
-    return;
-
-    //create world
     let mut world = World::new(world_options);
 
-    //main loop
+    let render_params = world.return_render_params();
+
+    let renderer = Renderer::new(render_params, world.return_width());
+
     let run = true;
     while run {
         clear();
-        display_grid(world.return_grid(), world.return_width());
+        renderer.render(world.return_grid());
         refresh();
         world.step();
-        thread::sleep(time::Duration::from_millis(50));
     }
 
-    //cleanup
     endwin();
-}
-
-fn display_grid(grid: &Vec<Cell>, width: usize) {
-    let mut row = String::new();
-    for (index, cell) in grid.iter().enumerate() {
-        if let &CellState::Dead = cell.get_state() {
-            row.push(' ');
-        } else {
-            row.push('o');
-        }
-
-        if index % width == width - 1 {
-            row.push('\n');
-            printw(&row.to_string());
-            row.clear();
-        } else {
-            row.push(' ');
-        }
-    }
 }
