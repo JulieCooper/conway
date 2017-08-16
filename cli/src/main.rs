@@ -1,5 +1,6 @@
 extern crate ncurses;
-use ncurses::{initscr, noecho, clear, refresh, printw, endwin, stdscr, getmaxyx};
+use ncurses::{initscr, noecho, endwin, stdscr, getmaxyx, start_color, init_pair};
+use ncurses::{COLOR_BLACK};
 extern crate argparse;
 use argparse::{ArgumentParser, StoreTrue, Store};
 extern crate conway;
@@ -11,17 +12,17 @@ use conway::world::{World, World_Options};
 use conway::world::rules::{Ruleset, Rulesets};
 use conway::world::rules::input_cells::InputCells;
 mod config;
-use config::Config;
+use config::{Config, Color};
 mod display;
 use display::Renderer;
 use std::{thread, time, env, process};
 use std::io::prelude::*;
 
 /*
- *TODO: Pause, play, step forward, step back, quit
- *TODO: Command line option parser
- *TODO: Config file parser for InputCells, Rulesets, and InitialState
  *TODO: Color options, ANSI codes
+ *TODO: Interactive mode
+ *TODO: Pause, play, step forward, step back, quit
+ *TODO: Config file parser for InputCells, Rulesets, and InitialState
  *TODO: Cell state history
  *TODO: Non-square cells
  *TODO: Extensibility
@@ -31,6 +32,8 @@ use std::io::prelude::*;
 fn main() {
     //start ncurses
     initscr();
+    start_color();
+    init_pair(1, COLOR_BLACK, COLOR_BLACK);
     noecho();
     //get terminal dimensions:
     let mut max_x = 0;
@@ -39,10 +42,11 @@ fn main() {
     let (max_x, max_y) = (max_x as u64 / 2, max_y as u64);
 
     let mut config = Config {
-        //cli specific options
-        alive_char: 'o',
+        live_char: 'o',
         dead_char: ' ',
-        //core options
+        filled: false,
+        color: String::from("Green"),
+        //
         output_file: String::new(),
         initial_state: String::from("Random"),
         adjacent_rules: String::from("Neighbors"),
@@ -52,10 +56,10 @@ fn main() {
         height: max_y,
     };
     {
-        //parse command line arguments
+        //parse arguments
         let mut ap = ArgumentParser::new();
-        ap.refer(&mut config.alive_char)
-            .add_option(&["-c", "--alive-char"], Store,
+        ap.refer(&mut config.live_char)
+            .add_option(&["-l", "--live-char"], Store,
                         "Alive character");
         ap.refer(&mut config.dead_char)
             .add_option(&["-d", "--dead-char"], Store,
@@ -75,29 +79,30 @@ fn main() {
         ap.refer(&mut config.delay)
             .add_option(&["-d", "--delay"], Store,
                         "Delay between ticks");
+        ap.refer(&mut config.width)
+            .add_option(&["-w", "--width"], Store,
+                        "Width of grid in cells");
+        ap.refer(&mut config.filled)
+            .add_option(&["-f", "--filled"], StoreTrue,
+                        "Fill cells instead of printing character");
+        ap.refer(&mut config.color)
+            .add_option(&["-c", "--color"], Store,
+                        "Color for live cells");
+        ap.refer(&mut config.height)
+            .add_option(&["-h", "--height"], Store,
+                        "Height of grid in cells");
         ap.parse_args();
     }
-    //println!("--alive-char: {}", config.alive_char);
-    //println!("--dead-char: {}", config.dead_char);
-    //println!("--debug-output: {}", config.output_file);
-    //println!("--initial-state: {}", config.initial_state);
-    //println!("--adjacent-rules: {}", config.adjacent_rules);
-    //println!("--ruleset: {}", config.ruleset);
-    //println!("--delay: {}", config.delay);
 
-    let world_options = config.return_options();
+    let (render_ops, world_ops) = config.return_options();
 
-    let mut world = World::new(world_options);
+    let mut world = World::new(world_ops);
 
-    let render_params = world.return_render_params();
-
-    let renderer = Renderer::new(render_params, world.return_width());
+    let renderer = Renderer::new(render_ops, world.return_width());
 
     let run = true;
     while run {
-        clear();
         renderer.render(world.return_grid());
-        refresh();
         world.step();
     }
 

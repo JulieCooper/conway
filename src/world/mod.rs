@@ -13,17 +13,6 @@ pub struct World_Options {
     pub init: InitialState,
     pub input_cells: InputCells,
     pub rules: Rulesets,
-    pub delay: u64,
-    pub alive_char: char,
-    pub dead_char: char,
-}
-#[derive(Clone)]
-pub struct RenderParameters {
-    pub delay: u64,
-    pub alive_char: char,
-    pub dead_char: char,
-    pub width: u64,
-    pub height: u64,
 }
 pub struct World {
     time: u64,
@@ -32,7 +21,6 @@ pub struct World {
     grid: Vec<Cell>,
     input_cells: InputCells,
     rules: DSL_Ruleset,
-    render_params: RenderParameters,
 }
 impl World {
     pub fn new(options: World_Options) -> Self {
@@ -55,12 +43,6 @@ impl World {
             grid: grid,
             input_cells: options.input_cells,
             rules: rules,
-            render_params: RenderParameters {
-                delay: options.delay,
-                alive_char: options.alive_char,
-                dead_char: options.dead_char,
-                width: w, height: h,
-            },
         }
     }
 
@@ -147,8 +129,5 @@ impl World {
     }
     pub fn return_width(&self) -> usize {
         self.width as usize
-    }
-    pub fn return_render_params(&self) -> RenderParameters {
-        self.render_params.clone()
     }
 }
