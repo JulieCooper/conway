@@ -1,7 +1,7 @@
-use ncurses::{clear, erase, refresh, printw, init_pair, attron, COLOR_PAIR};
+use ncurses::{erase, refresh, printw, init_pair, attron, COLOR_PAIR};
 use ncurses::{COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_BLUE, COLOR_WHITE};
 use conway::world::cell::{Cell, CellState};
-use config::{Render_Options, Color};
+use config::{RenderOptions, Color};
 use std::{thread, time};
 
 pub struct Renderer {
@@ -9,10 +9,12 @@ pub struct Renderer {
     live_char: char,
     dead_char: char,
     width: usize,
-    height: u64,
+    //height: u64,
+    //?
+    time_slice: bool,
 }
 impl Renderer {
-    pub fn new(params: Render_Options, width: usize) -> Renderer {
+    pub fn new(params: RenderOptions, width: usize) -> Renderer {
         if params.filled {
             match params.color {
                 Color::Red => init_pair(2, COLOR_RED, COLOR_RED),
@@ -33,7 +35,8 @@ impl Renderer {
             live_char: params.live_char,
             dead_char: params.dead_char,
             width: width,
-            height: params.height,
+            //height: params.height,
+            time_slice: params.time_slice,
         }
     }
     pub fn render(&self, grid: &Vec<Cell>) {
@@ -53,6 +56,7 @@ impl Renderer {
                 printw(" ");
             }
         }
+        if self.time_slice { println!(" "); }
         refresh();
         thread::sleep(time::Duration::from_millis(self.delay));
     }

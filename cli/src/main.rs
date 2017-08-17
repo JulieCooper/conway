@@ -4,29 +4,25 @@ use ncurses::{COLOR_BLACK};
 extern crate argparse;
 use argparse::{ArgumentParser, StoreTrue, Store};
 extern crate conway;
-use conway::world::return_types::{StepError, StepResult};
-use conway::world::cell::{Cell, CellState};
-use conway::world::builder::InitialState;
-use conway::world::builder::designs::Design;
-use conway::world::{World, World_Options};
-use conway::world::rules::{Ruleset, Rulesets};
-use conway::world::rules::input_cells::InputCells;
+//use conway::world::return_types::{StepError, StepResult};
+use conway::world::World;
 mod config;
-use config::{Config, Color};
+use config::Config;
 mod display;
 use display::Renderer;
-use std::{thread, time, env, process};
-use std::io::prelude::*;
+//use std::io::prelude::*;
 
 /*
- *TODO: Color options, ANSI codes
- *TODO: Interactive mode
- *TODO: Pause, play, step forward, step back, quit
  *TODO: Config file parser for InputCells, Rulesets, and InitialState
+ *TODO: Pause, play, step forward, step back, quit
+ *TODO: Interactive mode
  *TODO: Cell state history
  *TODO: Non-square cells
  *TODO: Extensibility
  *TODO: Sub-automata (arbitrary depth?)
+*/
+/*Cool but unimportant shit:
+ *_: 
 */
 
 fn main() {
@@ -46,6 +42,8 @@ fn main() {
         dead_char: ' ',
         filled: false,
         color: String::from("Green"),
+        //?
+        time_slice: false,
         //
         output_file: String::new(),
         initial_state: String::from("Random"),
@@ -85,13 +83,19 @@ fn main() {
         ap.refer(&mut config.filled)
             .add_option(&["-f", "--filled"], StoreTrue,
                         "Fill cells instead of printing character");
+        ap.refer(&mut config.time_slice)
+            .add_option(&["-z", "--time-slice"], StoreTrue,
+                        "Show progress of grid in time");
         ap.refer(&mut config.color)
             .add_option(&["-c", "--color"], Store,
                         "Color for live cells");
         ap.refer(&mut config.height)
             .add_option(&["-h", "--height"], Store,
                         "Height of grid in cells");
-        ap.parse_args();
+        match ap.parse_args() {
+            Ok(_) => (),
+            Err(_e) => (),
+        }
     }
 
     let (render_ops, world_ops) = config.return_options();
@@ -103,7 +107,10 @@ fn main() {
     let run = true;
     while run {
         renderer.render(world.return_grid());
-        world.step();
+        match world.step() {
+            Ok(stats) => stats, //FIXME:do something with this. And actually populate them!!!
+            Err(e) => panic!("Error stepping world forward: {:?}", e),
+        };
     }
 
     endwin();

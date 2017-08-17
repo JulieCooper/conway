@@ -9,9 +9,7 @@ pub enum InitialState {
     Random,
     Ordered(Vec<(u64, u64)>),
     Library(Design),
-    //Lambda(Box<FnMut(&Cell)->CellState>),
     Lambda,
-    //random_from_library
 }
 pub struct WorldBuilder {
     width: u64,

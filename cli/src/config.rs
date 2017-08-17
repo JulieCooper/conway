@@ -1,15 +1,10 @@
-extern crate argparse;
-use argparse::{ArgumentParser, StoreTrue, Store};
 use conway::world::World_Options;
 use conway::world::cell::CellState;
 use conway::world::builder::InitialState;
 use conway::world::builder::designs::Design;
 use conway::world::rules::Rulesets;
 use conway::world::rules::input_cells::InputCells;
-use std::env;
-use std::error::Error;
-//use std::fs::File;
-use std::io::prelude::*;
+//use std::error::Error;
 
 #[derive(Clone)]
 pub enum Color {
@@ -18,7 +13,7 @@ pub enum Color {
     Blue,
     White,
 }
-pub struct Render_Options {
+pub struct RenderOptions {
     pub width: usize,
     pub height: u64,
     pub delay: u64,
@@ -26,6 +21,8 @@ pub struct Render_Options {
     pub dead_char: char,
     pub filled: bool,
     pub color: Color,
+    //?
+    pub time_slice: bool,
 }
 //what is recieved from command line args
 pub struct Config {
@@ -33,6 +30,8 @@ pub struct Config {
     pub dead_char: char,
     pub filled: bool,
     pub color: String,
+    //?
+    pub time_slice: bool,
     //
     pub output_file: String,
     pub initial_state: String,
@@ -85,15 +84,16 @@ impl Config {
             None => Color::White,
         }
     }
-    pub fn return_options(&self) -> (Render_Options, World_Options) {
+    pub fn return_options(&self) -> (RenderOptions, World_Options) {
         (
-            Render_Options {
+            RenderOptions {
                 width: self.width as usize,
                 height: self.height,
                 delay: self.delay,
                 live_char: self.live_char,
                 dead_char: self.dead_char,
                 filled: self.filled,
+                time_slice: self.time_slice,
                 color: Config::parse_color(&self.color),
             },
             World_Options {
