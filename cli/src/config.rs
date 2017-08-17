@@ -8,9 +8,13 @@ use conway::world::rules::input_cells::InputCells;
 
 #[derive(Clone)]
 pub enum Color {
+    Black,
     Red,
     Green,
+    Yellow,
     Blue,
+    Magenta,
+    Cyan,
     White,
 }
 pub struct RenderOptions {
@@ -77,9 +81,14 @@ impl Config {
     }
     fn parse_color(x: &String) -> Color {
         match Some(&*x.to_string()) {
+            Some("Black") => Color::Black,
             Some("Red") => Color::Red,
             Some("Green") => Color::Green,
+            Some("Yellow") => Color::Yellow,
             Some("Blue") => Color::Blue,
+            Some("Magenta") => Color::Magenta,
+            Some("Cyan") => Color::Cyan,
+            Some("White") => Color::White,
             Some(&_) => Color::White,
             None => Color::White,
         }
