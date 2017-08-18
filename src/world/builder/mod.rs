@@ -61,7 +61,7 @@ impl WorldBuilder {
     fn populate_random(grid_ref: &mut Vec<Cell>) {
         let mut rng = rand::thread_rng();
         for cell in grid_ref.iter_mut() {
-            let rand_state = match rng.gen() {
+            match rng.gen() {
                 true => cell.set_state(CellState::Live),
                 false => cell.set_state(CellState::Dead),
             };

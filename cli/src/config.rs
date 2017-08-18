@@ -24,7 +24,9 @@ pub struct RenderOptions {
     pub live_char: char,
     pub dead_char: char,
     pub filled: bool,
+    pub inverse: bool,
     pub color: Color,
+    pub dead_color: Color,
     //?
     pub time_slice: bool,
 }
@@ -33,7 +35,9 @@ pub struct Config {
     pub live_char: char,
     pub dead_char: char,
     pub filled: bool,
+    pub inverse: bool,
     pub color: String,
+    pub dead_color: String,
     //?
     pub time_slice: bool,
     //
@@ -102,8 +106,10 @@ impl Config {
                 live_char: self.live_char,
                 dead_char: self.dead_char,
                 filled: self.filled,
+                inverse: self.inverse,
                 time_slice: self.time_slice,
                 color: Config::parse_color(&self.color),
+                dead_color: Config::parse_color(&self.dead_color),
             },
             World_Options {
                 width_height: (self.width, self.height),

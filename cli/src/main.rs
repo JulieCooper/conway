@@ -29,7 +29,6 @@ fn main() {
     //start ncurses
     initscr();
     start_color();
-    init_pair(1, COLOR_BLACK, COLOR_BLACK);
     noecho();
     //get terminal dimensions:
     let mut max_x = 0;
@@ -41,7 +40,9 @@ fn main() {
         live_char: 'o',
         dead_char: ' ',
         filled: false,
-        color: String::from("Green"),
+        inverse: false,
+        color: String::from("White"),
+        dead_color: String::from("Black"),
         //?
         time_slice: false,
         //
@@ -83,12 +84,18 @@ fn main() {
         ap.refer(&mut config.filled)
             .add_option(&["-f", "--filled"], StoreTrue,
                         "Fill cells instead of printing character");
+        ap.refer(&mut config.inverse)
+            .add_option(&["-i", "--inverse"], StoreTrue,
+                        "Inverse live and dead cell display");
         ap.refer(&mut config.time_slice)
             .add_option(&["-z", "--time-slice"], StoreTrue,
                         "Show progress of grid in time");
         ap.refer(&mut config.color)
             .add_option(&["-c", "--color"], Store,
                         "Color for live cells");
+        ap.refer(&mut config.dead_color)
+            .add_option(&["--dead-color"], Store,
+                        "Color for dead cells");
         ap.refer(&mut config.height)
             .add_option(&["-h", "--height"], Store,
                         "Height of grid in cells");
