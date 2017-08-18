@@ -12,12 +12,12 @@ pub enum InitialState {
     Lambda,
 }
 pub struct WorldBuilder {
-    width: u64,
-    height: u64,
+    width: usize,
+    height: usize,
     init: InitialState,
 }
 impl WorldBuilder {
-    pub fn new(width: u64, height: u64, init: InitialState) -> Self {
+    pub fn new(width: usize, height: usize, init: InitialState) -> Self {
         WorldBuilder { 
             width: width,
             height: height,
@@ -27,11 +27,11 @@ impl WorldBuilder {
     fn gen_index(&self, x: u64, y: u64) -> usize {
         x as usize + y as usize * self.width as usize
     }
-    fn add_cells(&self, grid_ref: &mut Vec<Cell>, w: u64, h: u64) {
+    fn add_cells(&self, grid_ref: &mut Vec<Cell>, w: usize, h: usize) {
         //fill grid by x and y with new cells
         for y in 0..h {
             for x in 0..w {
-                let cell = Cell::new((x,y), CellState::Uninitialized);
+                let cell = Cell::new((x as u64,y as u64), CellState::Uninitialized);
                 grid_ref.push(cell);
             }
         }

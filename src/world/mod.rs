@@ -9,15 +9,15 @@ use self::rules::{DSL_Ruleset, Rulesets};
 use self::rules::input_cells::InputCells;
 
 pub struct World_Options {
-    pub width_height: (u64, u64),
+    pub width_height: (usize, usize),
     pub init: InitialState,
     pub input_cells: InputCells,
     pub rules: Rulesets,
 }
 pub struct World {
     time: u64,
-    width: u64,
-    height: u64,
+    width: usize,
+    height: usize,
     grid: Vec<Cell>,
     input_cells: InputCells,
     rules: DSL_Ruleset,
@@ -26,11 +26,12 @@ impl World {
     pub fn new(options: World_Options) -> Self {
         let (w, h) = options.width_height;
 
-        //setup vector
         let mut grid = Vec::with_capacity(w as usize * h as usize);
 
-        //create WorldBuilder object
         let mut wb = WorldBuilder::new(w, h, options.init);
+        //FIXME: worldbuilder should NOT take init as parameter,
+        //init should be passed in to build() after world builder
+        //is created.
         
         //build world
         wb.build(&mut grid);
@@ -53,7 +54,7 @@ impl World {
     }
 
     fn get_cell_state(&self, xy: (u64, u64)) -> CellState {
-        let index = xy.0 + self.width * xy.1;
+        let index = xy.0 + self.width as u64 * xy.1;
 
         match self.grid.get(index as usize) {
             Some(cell) => cell.get_state().clone(),

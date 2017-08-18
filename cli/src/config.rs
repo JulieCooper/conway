@@ -19,23 +19,42 @@ pub enum Color {
 }
 pub struct RenderOptions {
     pub width: usize,
-    pub height: u64,
+    pub height: usize,
     pub delay: u64,
     pub live_char: char,
     pub dead_char: char,
     pub filled: bool,
     pub inverse: bool,
+    pub padding: bool,
     pub color: Color,
     pub dead_color: Color,
     //?
     pub time_slice: bool,
 }
-//what is recieved from command line args
+impl RenderOptions {
+    pub fn new() -> Self {
+        RenderOptions {
+            width: 0,
+            height: 0,
+            delay: 0,
+            live_char: ' ',
+            dead_char: ' ',
+            filled: false,
+            inverse: false,
+            padding: false,
+            color: Color::White,
+            dead_color: Color::White,
+            time_slice: false,
+        }
+    }
+}
+#[derive(Clone)]
 pub struct Config {
     pub live_char: char,
     pub dead_char: char,
     pub filled: bool,
     pub inverse: bool,
+    pub padding: bool,
     pub color: String,
     pub dead_color: String,
     //?
@@ -46,8 +65,8 @@ pub struct Config {
     pub adjacent_rules: String,
     pub ruleset: String,
     pub delay: u64,
-    pub width: u64,
-    pub height: u64,
+    pub width: usize,
+    pub height: usize,
 }
 impl Config {
     fn parse_initial_state(x: &String) -> InitialState {
@@ -100,13 +119,14 @@ impl Config {
     pub fn return_options(&self) -> (RenderOptions, World_Options) {
         (
             RenderOptions {
-                width: self.width as usize,
+                width: self.width,
                 height: self.height,
                 delay: self.delay,
                 live_char: self.live_char,
                 dead_char: self.dead_char,
                 filled: self.filled,
                 inverse: self.inverse,
+                padding: self.padding,
                 time_slice: self.time_slice,
                 color: Config::parse_color(&self.color),
                 dead_color: Config::parse_color(&self.dead_color),
