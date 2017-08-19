@@ -2,14 +2,32 @@ pub mod designs;
 use self::designs::Design;
 use world::{Cell, CellState};
 extern crate rand;
+use std::str::FromStr;
 use rand::Rng;
 
+//TODO: Generalize procedural starting grid states
+//TODO: Center prefabs
+#[derive(Clone)]
 pub enum InitialState {
     Blank(CellState),
     Random,
     Ordered(Vec<(u64, u64)>),
     Library(Design),
     Lambda,
+}
+impl FromStr for InitialState {
+    type Err = ();
+    fn from_str(s: &str) -> Result<InitialState, ()> {
+        match s {
+            //procedural
+            "Random" => Ok(InitialState::Random),
+            "Blank" => Ok(InitialState::Blank(CellState::Dead)),
+            "Filled" => Ok(InitialState::Blank(CellState::Live)),
+            //prefab
+            "Eureka" => Ok(InitialState::Library(Design::Eureka)),
+            _ => Err(()),
+        }
+    }
 }
 pub struct WorldBuilder {
     width: usize,
@@ -82,10 +100,10 @@ impl WorldBuilder {
         let data = design.get_data();
         self.populate_ordered(grid_ref, &data);
     }
-    fn populate_lambda(grid_ref: &mut Vec<Cell>, mut f: Box<FnMut(&Cell)->CellState>) {
-        for cell in grid_ref.iter_mut() {
-            let new_state = f(cell);
-            cell.set_state(new_state);
-        }
-    }
+    //fn populate_lambda(grid_ref: &mut Vec<Cell>, mut f: Box<FnMut(&Cell)->CellState>) {
+    //    for cell in grid_ref.iter_mut() {
+    //        let new_state = f(cell);
+    //        cell.set_state(new_state);
+    //    }
+    //}
 }

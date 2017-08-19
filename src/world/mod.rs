@@ -5,30 +5,42 @@ use self::builder::{InitialState, WorldBuilder};
 pub mod return_types;
 use self::return_types::{StepResult, StepError};
 pub mod rules;
-use self::rules::{DSL_Ruleset, Rulesets};
+use self::rules::{DSLRuleset, Rulesets};
 use self::rules::input_cells::InputCells;
 
-pub struct World_Options {
+#[derive(Clone)]
+pub struct WorldOptions {
     pub width_height: (usize, usize),
     pub init: InitialState,
     pub input_cells: InputCells,
     pub rules: Rulesets,
 }
+impl WorldOptions {
+    pub fn new() -> Self {
+        WorldOptions {
+            width_height: (0, 0),
+            init: InitialState::Random,
+            input_cells: InputCells::Neighbors,
+            rules: Rulesets::Conway,
+        }
+    }
+}
+
 pub struct World {
     time: u64,
     width: usize,
     height: usize,
     grid: Vec<Cell>,
     input_cells: InputCells,
-    rules: DSL_Ruleset,
+    rules: DSLRuleset,
 }
 impl World {
-    pub fn new(options: World_Options) -> Self {
+    pub fn new(options: WorldOptions) -> Self {
         let (w, h) = options.width_height;
 
         let mut grid = Vec::with_capacity(w as usize * h as usize);
 
-        let mut wb = WorldBuilder::new(w, h, options.init);
+        let wb = WorldBuilder::new(w, h, options.init);
         //FIXME: worldbuilder should NOT take init as parameter,
         //init should be passed in to build() after world builder
         //is created.
@@ -78,7 +90,7 @@ impl World {
 
         //format neighbor states for input to ruleset (Amount, ResultState)
         let mut output_vector = Vec::new();
-        use self::cell::CellState::{Dead, Live, OOB, Uninitialized};
+        use self::cell::CellState::{Dead, Live};
         for state in vec![Dead, Live].iter() {
             let num = neighbor_states.iter().filter(|x| x == &state).count();
             output_vector.push( (state.clone(), num) );
@@ -116,7 +128,9 @@ impl World {
             updated_cells: 100,
         }
     }
+
     pub fn step(&mut self) -> Result<StepResult, StepError> {
+        self.time = self.time + 1;
         //get list of state changes according to rules
         let changes = self.process_cells();
 
@@ -125,9 +139,11 @@ impl World {
 
         Ok(sr)
     }
+
     pub fn return_grid(&self) -> &Vec<Cell> {
         &self.grid
     }
+
     pub fn return_width(&self) -> usize {
         self.width as usize
     }

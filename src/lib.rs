@@ -1,5 +1,4 @@
 extern crate rand;
-use rand::Rng;
 
 pub mod world;
 //mod display;

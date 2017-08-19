@@ -2,8 +2,41 @@ use ncurses::{initscr, start_color, noecho, getmaxyx, stdscr, endwin};
 use ncurses::{erase, refresh, printw, init_pair, attron, COLOR_PAIR};
 use ncurses::{COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE};
 use conway::world::cell::{Cell, CellState};
-use config::{RenderOptions, Color};
 use std::{thread, time, str};
+use std::str::FromStr;
+
+#[derive(Clone)]
+pub struct RenderOptions {
+    pub width: usize,
+    pub height: usize,
+    pub delay: u64,
+    pub live_char: char,
+    pub dead_char: char,
+    pub filled: bool,
+    pub inverse: bool,
+    pub padding: bool,
+    pub color: Color,
+    pub dead_color: Color,
+    //?
+    pub time_slice: bool,
+}
+impl RenderOptions {
+    pub fn new() -> Self {
+        RenderOptions {
+            width: 0,
+            height: 0,
+            delay: 0,
+            live_char: ' ',
+            dead_char: ' ',
+            filled: false,
+            inverse: false,
+            padding: false,
+            color: Color::White,
+            dead_color: Color::White,
+            time_slice: false,
+        }
+    }
+}
 
 fn color_to_i16(color: Color) -> i16 {
     match color {
@@ -17,11 +50,13 @@ fn color_to_i16(color: Color) -> i16 {
         Color::White => COLOR_WHITE,
     }
 }
+
 fn set_color_pair(id: i16, bg_color: Color, fg_color: Color) {
     init_pair(id,
               color_to_i16(bg_color),
               color_to_i16(fg_color));
 }
+
 pub struct Renderer {
     options: RenderOptions,
 }
@@ -37,16 +72,23 @@ impl Renderer {
         start_color();
         noecho();
     }
+
+    pub fn end(&self) {
+        endwin();
+    }
+
     pub fn return_term_size(&self) -> (usize, usize) {
         let mut max_x = 0;
         let mut max_y = 0;
         getmaxyx(stdscr(), &mut max_y, &mut max_x);
         (max_x as usize / 2, max_y as usize)
     }
-    
-    pub fn end(&self) {
-        endwin();
+
+    pub fn set_options(&mut self, options: RenderOptions) {
+        self.options = options;
+        self.init_options();
     }
+
     fn init_options(&mut self) {
         //set live/dead terminal colors
         let (live_bg, dead_bg) = if self.options.filled {
@@ -58,10 +100,6 @@ impl Renderer {
         set_color_pair(2, self.options.color.clone(), live_bg);
     }
 
-    pub fn set_options(&mut self, options: RenderOptions) {
-        self.options = options;
-        self.init_options();
-    }
     pub fn render(&self, grid: &Vec<Cell>) {
         erase();
         let mut buf: [u8; 4] = [0; 4];
@@ -103,5 +141,33 @@ impl Renderer {
         if self.options.time_slice { println!(" "); }
         refresh();
         thread::sleep(time::Duration::from_millis(self.options.delay));
+    }
+}
+
+#[derive(Clone)]
+pub enum Color {
+    Black,
+    Red,
+    Green,
+    Yellow,
+    Blue,
+    Magenta,
+    Cyan,
+    White,
+}
+impl FromStr for Color {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Color, ()> {
+        match s {
+            "Black" => Ok(Color::Black),
+            "Red" => Ok(Color::Red),
+            "Green" => Ok(Color::Green),
+            "Yellow" => Ok(Color::Yellow),
+            "Blue" => Ok(Color::Blue),
+            "Magenta" => Ok(Color::Magenta),
+            "Cyan" => Ok(Color::Cyan),
+            "White" => Ok(Color::White),
+            _ => Err(()),
+        }
     }
 }

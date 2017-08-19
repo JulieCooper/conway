@@ -1,31 +1,44 @@
 pub mod input_cells;
 use self::input_cells::InputCells;
 use world::CellState;
+use std::str::FromStr;
 use std::collections::HashMap;
-use std::collections::hash_map::Entry::{Vacant, Occupied};
 
-type Ruleset_Type = HashMap<(CellState, CellState), Vec<(usize, CellState)>>;
+type RulesetType = HashMap<(CellState, CellState), Vec<(usize, CellState)>>;
+
+#[derive(Clone)]
 pub enum Rulesets {
     Custom,
     Conway,
     ConwayEasy,
 }
+#[derive(Clone)]
 pub struct Ruleset {
     pub input_cells: InputCells,
     pub rules: Rulesets,
 }
+impl FromStr for Rulesets {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Rulesets, ()> {
+        match s {
+            "Conway" => Ok(Rulesets::Conway),
+            "ConwayEasy" => Ok(Rulesets::ConwayEasy),
+            _ => Err(()),
+        }
+    }
+}
 impl Rulesets {
-    pub fn get_data(&self) -> DSL_Ruleset {
+    pub fn get_data(&self) -> DSLRuleset {
         use self::CellState::{Dead, Live};
         match *self {
             //Custom will use yet-formalized DSL that will be used for config files
             Rulesets::Custom => {
-                let mut ruleset = DSL_Ruleset::new();
+                let mut ruleset = DSLRuleset::new();
                 ruleset.add_cases(Dead, Live, vec![(3, Live)]);
                 ruleset
             },
             Rulesets::ConwayEasy => {
-                let mut ruleset = DSL_Ruleset::new();
+                let mut ruleset = DSLRuleset::new();
                 ruleset.add_cases(Dead, Live, vec![(3, Live)]);
                 ruleset.add_cases(Live, Live, vec![
                     (0, Dead), (1, Dead), (4, Dead), (5, Dead),
@@ -34,7 +47,7 @@ impl Rulesets {
                 ruleset
             },
             Rulesets::Conway => {
-                let mut ruleset = DSL_Ruleset::new();
+                let mut ruleset = DSLRuleset::new();
                 ruleset.add_cases(Dead, Live, vec![(3, Live)]);
                 ruleset.add_cases(Live, Live, vec![
                     (0, Dead), (1, Dead), (4, Dead), (5, Dead),
@@ -45,12 +58,12 @@ impl Rulesets {
         }
     }
 }
-pub struct DSL_Ruleset {
-    data: Ruleset_Type,
+pub struct DSLRuleset {
+    data: RulesetType,
 }
-impl DSL_Ruleset {
+impl DSLRuleset {
     pub fn new() -> Self {
-        DSL_Ruleset {
+        DSLRuleset {
             data: HashMap::new(),
         }
     }

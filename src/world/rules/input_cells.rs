@@ -1,11 +1,28 @@
+use std::str::FromStr;
+
+#[derive(Clone)]
 pub enum InputCells {
     Custom(Vec<(i8, i8)>),
     Neighbors,
-    No_Corners,
-    Corners_Only,
-    Far_Only,
-    Far_Also,
-    Far_Corners_Only,
+    NoCorners,
+    CornersOnly,
+    FarOnly,
+    FarAlso,
+    FarCornersOnly,
+}
+impl FromStr for InputCells {
+    type Err = ();
+    fn from_str(s: &str) -> Result<InputCells, ()> {
+        match s {
+            "Neighbors" => Ok(InputCells::Neighbors),
+            "NoCorners" => Ok(InputCells::NoCorners),
+            "CornersOnly" => Ok(InputCells::CornersOnly),
+            "FarOnly" => Ok(InputCells::FarOnly),
+            "FarAlso" => Ok(InputCells::FarAlso),
+            "FarCornersOnly" => Ok(InputCells::FarCornersOnly),
+            _ => Err(()),
+        }
+    }
 }
 impl InputCells {
     pub fn get_data(&self) -> Vec<(i8, i8)> {
@@ -17,21 +34,21 @@ impl InputCells {
                 (-1, 1), (0, 1), (1, 1)
                 ]
             },
-            InputCells::No_Corners => {
+            InputCells::NoCorners => {
                 vec![
                          (0,-1),        
                 (-1, 0),         (1, 0),
                          (0, 1)        
                 ]
             },
-            InputCells::Corners_Only => {
+            InputCells::CornersOnly => {
                 vec![
                 (-1,-1),         (1,-1),
                                         
                 (-1, 1),         (1, 1)
                 ]
             },
-            InputCells::Far_Only => {
+            InputCells::FarOnly => {
                 vec![
                 (-2,-2), (-1,-2), (0,-2), (1,-2), (2,-2),
                 (-2,-1),                          (2,-1),
@@ -40,7 +57,7 @@ impl InputCells {
                 (-2, 2), (-1, 2), (0, 2), (1, 2), (2, 2)
                 ]
             },
-            InputCells::Far_Also => {
+            InputCells::FarAlso => {
                 vec![
                 (-2,-2), (-1,-2), (0,-2), (1,-2), (2,-2),
                 (-2,-1), (-1,-1), (0,-1), (1,-1), (2,-1),
@@ -49,7 +66,7 @@ impl InputCells {
                 (-2, 2), (-1, 2), (0, 2), (1, 2), (2, 2)
                 ]
             },
-            InputCells::Far_Corners_Only => {
+            InputCells::FarCornersOnly => {
                 vec![
                 (-2,-2), (-1,-2),         (1,-2), (2,-2),
                 (-2,-1),                          (2,-1),
