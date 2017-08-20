@@ -11,6 +11,8 @@ pub enum Rulesets {
     Custom,
     Conway,
     ConwayEasy,
+    ConwayVeryEasy,
+    Decay,
 }
 #[derive(Clone)]
 pub struct Ruleset {
@@ -23,6 +25,8 @@ impl FromStr for Rulesets {
         match s {
             "Conway" => Ok(Rulesets::Conway),
             "ConwayEasy" => Ok(Rulesets::ConwayEasy),
+            "ConwayVeryEasy" => Ok(Rulesets::ConwayVeryEasy),
+            "Decay" => Ok(Rulesets::Decay),
             _ => Err(()),
         }
     }
@@ -37,21 +41,41 @@ impl Rulesets {
                 ruleset.add_cases(Dead, Live, vec![(3, Live)]);
                 ruleset
             },
-            Rulesets::ConwayEasy => {
-                let mut ruleset = DSLRuleset::new();
-                ruleset.add_cases(Dead, Live, vec![(3, Live)]);
-                ruleset.add_cases(Live, Live, vec![
-                    (0, Dead), (1, Dead), (4, Dead), (5, Dead),
-                    (6, Dead), (7, Live), (8, Dead), (9, Dead),
-                ]);
-                ruleset
-            },
             Rulesets::Conway => {
                 let mut ruleset = DSLRuleset::new();
                 ruleset.add_cases(Dead, Live, vec![(3, Live)]);
                 ruleset.add_cases(Live, Live, vec![
                     (0, Dead), (1, Dead), (4, Dead), (5, Dead),
                     (6, Dead), (7, Dead), (8, Dead), (9, Dead),
+                ]);
+                ruleset
+            },
+            Rulesets::ConwayEasy => {
+                let mut ruleset = DSLRuleset::new();
+                ruleset.add_cases(Dead, Live, vec![(3, Live)]);
+                ruleset.add_cases(Live, Live, vec![
+                    (0, Dead), (1, Dead), (2, Live), (3, Live), 
+                    (4, Dead), (5, Dead), (6, Dead), (7, Live), (8, Dead), 
+                ]);
+                ruleset
+            },
+            Rulesets::ConwayVeryEasy => {
+                let mut ruleset = DSLRuleset::new();
+                ruleset.add_cases(Dead, Live, vec![
+                    (3, Live), (4, Live),
+                ]);
+                ruleset.add_cases(Live, Live, vec![
+                    (0, Dead), (1, Dead), (4, Dead), (5, Dead),
+                    (6, Dead), (7, Live), (8, Dead), (9, Dead),
+                ]);
+                ruleset
+            },
+            Rulesets::Decay => {
+                let mut ruleset = DSLRuleset::new();
+                ruleset.add_cases(Dead, Live, vec![(3, Live), (4, Live)]);
+                ruleset.add_cases(Live, Live, vec![
+                    (0, Dead), (1, Live), (2, Dead), (3, Dead), 
+                    (4, Live), (5, Dead), (6, Dead), (7, Dead), (8, Dead), 
                 ]);
                 ruleset
             },
