@@ -94,16 +94,16 @@ impl DSLRuleset {
     pub fn add_cases(&mut self,
                  identity_state: CellState,
                  for_state: CellState,
-                 cases: Vec<(usize, CellState)>)
-    {
+                 cases: Vec<(usize, CellState)>
+        ) {
         let key = (identity_state, for_state);
 
         self.data.insert(key, cases);
     }
     pub fn compute(&mut self,
                identity_state: CellState,
-               input_states: Vec<(CellState, usize)>)
-        -> CellState {
+               input_states: Vec<(CellState, usize)>
+        ) -> CellState {
 
         let mut return_state = identity_state.clone();
 
