@@ -36,29 +36,29 @@ It is recommended to add that directory to your $PATH variable.
 
 # Command-Line options:
 
-`-i, --initial-state`: Initial grid state.
-    Possible values:
-        Random (default)
-        LWSS
-        Glider
-        Eureka
-        Pulsar
+`-i, --initial-state`: Initial grid state.  
+    Possible values:  
+        Random (default)  
+        LWSS  
+        Glider  
+        Eureka  
+        Pulsar  
 
-`-a, --input-cells`: Cells to consider adjacent to cell currently being evaluated.
-    Possible values:
-        Neighbors (default)
-        NoCorners
-        CornersOnly
-        FarOnly
-        FarAlso
-        FarCornersOnly
+`-a, --input-cells`: Cells to consider adjacent to cell currently being evaluated.  
+    Possible values:  
+        Neighbors (default)  
+        NoCorners  
+        CornersOnly  
+        FarOnly  
+        FarAlso  
+        FarCornersOnly  
 
-`-r, --ruleset`: Ruleset to use to determine cell state changes.
-    Possible values:
-        Conway (default)
-        ConwayEasy
-        ConwayVeryEasy
-        Decay
+`-r, --ruleset`: Ruleset to use to determine cell state changes.  
+    Possible values:  
+        Conway (default)  
+        ConwayEasy  
+        ConwayVeryEasy  
+        Decay  
 
 `-t, --delay`: Delay between frames, in milliseconds
 
