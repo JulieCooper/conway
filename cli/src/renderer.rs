@@ -1,5 +1,6 @@
 use ncurses::{initscr, start_color, noecho, getmaxyx, stdscr, endwin};
 use ncurses::{erase, refresh, printw, init_pair, attron, COLOR_PAIR};
+use ncurses::{raw, nodelay};
 use ncurses::{COLOR_BLACK, COLOR_RED, COLOR_GREEN, COLOR_YELLOW, COLOR_BLUE, COLOR_MAGENTA, COLOR_CYAN, COLOR_WHITE};
 use conway::world::cell::{Cell, CellState};
 use std::{thread, time, str};
@@ -10,8 +11,8 @@ pub struct RenderOptions {
     pub width: usize,
     pub height: usize,
     pub delay: u64,
-    pub live_char: char,
-    pub dead_char: char,
+    pub live_char: String,
+    pub dead_char: String,
     pub filled: bool,
     pub inverse: bool,
     pub padding: bool,
@@ -26,8 +27,8 @@ impl RenderOptions {
             width: 0,
             height: 0,
             delay: 0,
-            live_char: ' ',
-            dead_char: ' ',
+            live_char: String::from(" "),
+            dead_char: String::from(" "),
             filled: false,
             inverse: false,
             padding: false,
@@ -69,6 +70,8 @@ impl Renderer {
 
     pub fn initialize(&mut self) {
         initscr();
+        raw();
+        nodelay(stdscr(), true);
         start_color();
         noecho();
     }
@@ -107,26 +110,26 @@ impl Renderer {
             if let &CellState::Dead = cell.get_state() {
                 if self.options.inverse {
                     attron(COLOR_PAIR(2));
-                    &self.options.live_char.encode_utf8(&mut buf);
-                    let s = str::from_utf8(&buf[..self.options.live_char.len_utf8()]).unwrap();
-                    printw(s);
+                    //&self.options.live_char.encode_utf8(&mut buf);
+                    //let s = str::from_utf8(&buf[..self.options.live_char.len_utf8()]).unwrap();
+                    printw(&self.options.live_char);
                 } else {
                     attron(COLOR_PAIR(1));
-                    &self.options.dead_char.encode_utf8(&mut buf);
-                    let s = str::from_utf8(&buf[..self.options.dead_char.len_utf8()]).unwrap();
-                    printw(s);
+                    //&self.options.dead_char.encode_utf8(&mut buf);
+                    //let s = str::from_utf8(&buf[..self.options.dead_char.len_utf8()]).unwrap();
+                    printw(&self.options.dead_char);
                 }
             } else {
                 if self.options.inverse {
                     attron(COLOR_PAIR(1));
-                    &self.options.dead_char.encode_utf8(&mut buf);
-                    let s = str::from_utf8(&buf[..self.options.dead_char.len_utf8()]).unwrap();
-                    printw(s);
+                    //&self.options.dead_char.encode_utf8(&mut buf);
+                    //let s = str::from_utf8(&buf[..self.options.dead_char.len_utf8()]).unwrap();
+                    printw(&self.options.dead_char);
                 } else {
                     attron(COLOR_PAIR(2));
-                    &self.options.live_char.encode_utf8(&mut buf);
-                    let s = str::from_utf8(&buf[..self.options.live_char.len_utf8()]).unwrap();
-                    printw(s);
+                    //&self.options.live_char.encode_utf8(&mut buf);
+                    //let s = str::from_utf8(&buf[..self.options.live_char.len_utf8()]).unwrap();
+                    printw(&self.options.live_char);
                 }
             }
             if index % self.options.width == self.options.width-1 {

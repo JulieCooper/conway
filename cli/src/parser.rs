@@ -1,5 +1,5 @@
 extern crate argparse;
-use self::argparse::{ArgumentParser, StoreTrue, Store};
+use self::argparse::{ArgumentParser, StoreTrue, StoreFalse, Store};
 use Config;
 
 pub struct Parser {
@@ -33,7 +33,7 @@ impl Parser {
                             "Ruleset");
             //delay
             ap.refer(&mut self.config.render_options.delay)
-                .add_option(&["-d", "--delay"], Store,
+                .add_option(&["-t", "--delay"], Store,
                             "Delay between ticks");
             //width
             ap.refer(&mut self.config.render_options.width)
@@ -55,9 +55,13 @@ impl Parser {
             ap.refer(&mut self.config.render_options.filled)
                 .add_option(&["-f", "--filled"], StoreTrue,
                             "Fill cells instead of printing character");
+            //padding
+            ap.refer(&mut self.config.render_options.padding)
+                .add_option(&["-p", "--padding-off"], StoreFalse,
+                            "Disable padding between cells");
             //inverse
             ap.refer(&mut self.config.render_options.inverse)
-                .add_option(&["-i", "--inverse"], StoreTrue,
+                .add_option(&["-v", "--inverse"], StoreTrue,
                             "Inverse live and dead cell display");
             //time_slice
             ap.refer(&mut self.config.render_options.time_slice)
@@ -69,13 +73,18 @@ impl Parser {
                             "Color for live cells");
             //dead_color
             ap.refer(&mut self.config.render_options.dead_color)
-                .add_option(&["--dead-color"], Store,
+                .add_option(&["-b", "--dead-color"], Store,
                             "Color for dead cells");
+
             match ap.parse_args() {
                 Ok(_) => (),
                 Err(_e) => (),
             }
         }
+        //copy any options that are shared between renderer and world
+        self.config.world_options.width = self.config.render_options.width;
+        self.config.world_options.height = self.config.render_options.height;
+
         self.config.clone()
     }
 }

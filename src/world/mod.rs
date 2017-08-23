@@ -10,7 +10,8 @@ use self::rules::input_cells::InputCells;
 
 #[derive(Clone)]
 pub struct WorldOptions {
-    pub width_height: (usize, usize),
+    pub width: usize,
+    pub height: usize,
     pub init: InitialState,
     pub input_cells: InputCells,
     pub rules: Rulesets,
@@ -18,7 +19,8 @@ pub struct WorldOptions {
 impl WorldOptions {
     pub fn new() -> Self {
         WorldOptions {
-            width_height: (0, 0),
+            width: 0,
+            height: 0,
             init: InitialState::Random,
             input_cells: InputCells::Neighbors,
             rules: Rulesets::Conway,
@@ -36,7 +38,7 @@ pub struct World {
 }
 impl World {
     pub fn new(options: WorldOptions) -> Self {
-        let (w, h) = options.width_height;
+        let (w, h) = (options.width, options.height);
 
         let mut grid = Vec::with_capacity(w as usize * h as usize);
 
