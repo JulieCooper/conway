@@ -81,3 +81,11 @@ It is recommended to add that directory to your $PATH variable.
 `-v, --inverse`: Reverse live and dead cell options for display
 
 `-z, --time-slice`: Cells drift upwards
+
+# Examles:
+
+`$ conway-cli -l 'r' -d 'j' -b Red -c Blue`
+
+`$ conway-cli -t 25 -c Cyan -b Red -l 'O' -d '|' -r Decay`
+
+`$ conway-cli -t 25 -c Green -a NoCorners -f -r ConwayVeryEasy`
