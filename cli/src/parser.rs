@@ -31,6 +31,10 @@ impl Parser {
             ap.refer(&mut self.config.world_options.rules)
                 .add_option(&["-r", "--ruleset"], Store,
                             "Ruleset");
+            //stopped
+            ap.refer(&mut self.config.render_options.stopped)
+                .add_option(&["-s", "--stopped"], StoreTrue,
+                            "Start paused");
             //delay
             ap.refer(&mut self.config.render_options.delay)
                 .add_option(&["-t", "--delay"], Store,

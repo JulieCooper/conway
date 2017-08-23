@@ -14,7 +14,7 @@ use renderer::{Renderer, RenderOptions, Color};
 
 /*
  *TODO: Config file parser for InputCells, Rulesets, and InitialState
- *TODO: Pause, play, step forward, step back, quit
+ *TODO: Restart (rebuild world)
  *TODO: Interactive mode, ncurses mouse control, hjkl control
          * add cells, remove cells
  *TODO: Cell state history + Display visited cells
@@ -45,6 +45,7 @@ fn main() {
             filled: false,
             inverse: false,
             padding: true,
+            stopped: false,
             color: Color::White,
             dead_color: Color::Black,
             //?
@@ -53,12 +54,12 @@ fn main() {
     };
 
     let (render_opts, world_opts) = Parser::new(defaults).parse().return_options();
+    let mut paused = render_opts.stopped.clone();
     renderer.set_options(render_opts);
 
     let mut world = World::new(world_opts);
 
     let mut run = true;
-    let mut paused = false;
     while run {
         let action = process_keyboard_input(getch());
 

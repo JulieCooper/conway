@@ -16,6 +16,7 @@ pub struct RenderOptions {
     pub filled: bool,
     pub inverse: bool,
     pub padding: bool,
+    pub stopped: bool,
     pub color: Color,
     pub dead_color: Color,
     //?
@@ -32,6 +33,7 @@ impl RenderOptions {
             filled: false,
             inverse: false,
             padding: false,
+            stopped: false,
             color: Color::White,
             dead_color: Color::White,
             time_slice: false,
