@@ -11,15 +11,15 @@ The engine happens to default to Conway's Game of Life.
 
 ---
 ## Installation/Compilation notes
-Install rust:
-`https://www.rust-lang.org/en-US/install.html`
+Install rust:  
+`https://www.rust-lang.org/en-US/install.html`  
 
-Download conway's source code:
-`git clone https://github.com/JeremyCooper/conway`
-`cd conway`
+Download conway's source code:  
+`git clone https://github.com/JeremyCooper/conway`  
+`cd conway`  
 
-Build and install conway:
-`cargo install --features="binaries"`
+Build and install conway:  
+`cargo install --features="binaries"`  
 
 If all went a compiled binary should have been placed in `~/.cargo/bin`.  
 It is recommended to add that directory to your $PATH variable.
