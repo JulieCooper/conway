@@ -29,15 +29,15 @@ It is recommended to add that directory to your $PATH variable.
 
 # Controls:
 
-`space`: pause/play
-`n`: step forward
-`q`: quit
+`space`: pause/play  
+`n`: step forward  
+`q`: quit  
 
 
 # Command-Line options:
 
 `-i, --initial-state`: Initial grid state.  
-    Possible values:  
+    **Possible values:**  
         Random (default)  
         LWSS  
         Glider  
@@ -45,7 +45,7 @@ It is recommended to add that directory to your $PATH variable.
         Pulsar  
 
 `-a, --input-cells`: Cells to consider adjacent to cell currently being evaluated.  
-    Possible values:  
+    **Possible values:**  
         Neighbors (default)  
         NoCorners  
         CornersOnly  
@@ -54,7 +54,7 @@ It is recommended to add that directory to your $PATH variable.
         FarCornersOnly  
 
 `-r, --ruleset`: Ruleset to use to determine cell state changes.  
-    Possible values:  
+    **Possible values:**  
         Conway (default)  
         ConwayEasy  
         ConwayVeryEasy  
