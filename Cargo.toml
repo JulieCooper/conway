@@ -1,5 +1,5 @@
 [package]
-name = "con"
+name = "grid-sim"
 description = "grid-based simulation in rust"
 license = "BSD-2-Clause"
 version = "0.3.0"
