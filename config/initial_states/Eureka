@@ -1,7 +1,0 @@
-[initial_state]
-name = "Beacon"
-center = true
-category = "Oscillators"
-cells = [
-	(1, 1), (2, 1), (1, 2), (4, 3), (3, 4), (4, 4)
-]

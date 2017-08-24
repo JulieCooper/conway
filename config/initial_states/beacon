@@ -1,0 +1,6 @@
+tags = ["oscillator"]
+dimensions = (13, 4)
+center = true
+cells = [
+    (1, 1), (2, 1), (1, 2), (4, 3), (3, 4), (4, 4)
+]
