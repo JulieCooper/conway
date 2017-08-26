@@ -49,7 +49,7 @@ impl WorldBuilder {
         //fill grid by x and y with new cells
         for y in 0..h {
             for x in 0..w {
-                let cell = Cell::new((x as u64,y as u64), CellState::Uninitialized);
+                let cell = Cell::new((x as u64,y as u64), 9999);
                 grid_ref.push(cell);
             }
         }
@@ -59,7 +59,7 @@ impl WorldBuilder {
 
         //match InitialState and make it so
         match self.init {
-            InitialState::Blank(ref state) => WorldBuilder::populate_all(grid_ref, state.clone()),
+            InitialState::Blank(ref state) => WorldBuilder::populate_all(grid_ref, 0),
             InitialState::Random => WorldBuilder::populate_random(grid_ref),
             InitialState::Ordered(ref coords) => {
                 self.populate_ordered(grid_ref, coords);
@@ -71,26 +71,26 @@ impl WorldBuilder {
             InitialState::Lambda => (),
         }
     }
-    fn populate_all(grid_ref: &mut Vec<Cell>, state: CellState) {
+    fn populate_all(grid_ref: &mut Vec<Cell>, state: usize) {
         for cell in grid_ref.iter_mut() {
-            cell.set_state(state.clone());
+            cell.set_state(state);
         }
     }
     fn populate_random(grid_ref: &mut Vec<Cell>) {
         let mut rng = rand::thread_rng();
         for cell in grid_ref.iter_mut() {
             match rng.gen() {
-                true => cell.set_state(CellState::Live),
-                false => cell.set_state(CellState::Dead),
+                true => cell.set_state(1),
+                false => cell.set_state(1),
             };
         }
     }
     fn populate_ordered(&self, grid_ref: &mut Vec<Cell>, coords: &Vec<(u64, u64)>) {
-        WorldBuilder::populate_all(grid_ref, CellState::Dead);
+        WorldBuilder::populate_all(grid_ref, 0);
         for coord in coords.iter() {
             match grid_ref.get_mut(self.gen_index(coord.0, coord.1)) {
                 Some(cell) => {
-                    cell.set_state(CellState::Live);
+                    cell.set_state(1);
                 },
                 None => panic!("invalid init coord"),
             }

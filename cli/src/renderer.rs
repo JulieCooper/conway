@@ -51,6 +51,7 @@ fn color_to_i16(color: Color) -> i16 {
         Color::Magenta => COLOR_MAGENTA,
         Color::Cyan => COLOR_CYAN,
         Color::White => COLOR_WHITE,
+        Color::Default => -1,
     }
 }
 
@@ -109,7 +110,7 @@ impl Renderer {
         erase();
         let mut buf: [u8; 4] = [0; 4];
         for (index, cell) in grid.iter().enumerate() {
-            if let &CellState::Dead = cell.get_state() {
+            if let 0 = cell.get_state() {
                 if self.options.inverse {
                     attron(COLOR_PAIR(2));
                     //&self.options.live_char.encode_utf8(&mut buf);
@@ -159,6 +160,7 @@ pub enum Color {
     Magenta,
     Cyan,
     White,
+    Default,
 }
 impl FromStr for Color {
     type Err = ();
@@ -172,6 +174,7 @@ impl FromStr for Color {
             "Magenta" => Ok(Color::Magenta),
             "Cyan" => Ok(Color::Cyan),
             "White" => Ok(Color::White),
+            "Default" => Ok(Color::Default),
             _ => Err(()),
         }
     }

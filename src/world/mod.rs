@@ -61,29 +61,29 @@ impl World {
         }
     }
 
-    fn set_cell_state(&mut self, index: usize, new: CellState) {
+    fn set_cell_state(&mut self, index: usize, new: usize) {
         if let Some(cell) = self.grid.get_mut(index) {
             cell.set_state(new)
         }
     }
 
-    fn get_cell_state(&self, xy: (u64, u64)) -> CellState {
+    fn get_cell_state(&self, xy: (u64, u64)) -> usize {
         let index = xy.0 + self.width as u64 * xy.1;
 
         match self.grid.get(index as usize) {
-            Some(cell) => cell.get_state().clone(),
-            None => CellState::OOB,
+            Some(cell) => cell.get_state(),
+            None => 9999,
         }
     }
 
-    fn get_neighbor_states(&self, xy: (u64, u64)) -> Vec<(CellState, usize)> {
+    fn get_neighbor_states(&self, xy: (u64, u64)) -> Vec<(usize, usize)> {
         let (x, y) = xy;
         //get neighbor states
         let neighbor_states = self.input_cells.get_data().iter().map(|rule| {
             let x = x as i64 + rule.0 as i64;
             let y = y as i64 + rule.1 as i64;
             if (x < 0) | (y < 0) | (x > self.width as i64) | (y > self.height as i64) {
-                CellState::OOB
+                9999
             } else {
                 let coords = (x as u64, y as u64);
                 self.get_cell_state(coords)
@@ -92,8 +92,7 @@ impl World {
 
         //format neighbor states for input to ruleset (Amount, ResultState)
         let mut output_vector = Vec::new();
-        use self::cell::CellState::{Dead, Live};
-        for state in vec![Dead, Live].iter() {
+        for state in vec![0, 1].iter() {
             let num = neighbor_states.iter().filter(|x| x == &state).count();
             output_vector.push( (state.clone(), num) );
         }
@@ -102,7 +101,7 @@ impl World {
     }
 
     //map through all cells, applying rules and returning computed next grid state
-    fn process_cells(&mut self) -> Vec<CellState> {
+    fn process_cells(&mut self) -> Vec<usize> {
 
         let mut neighbor_states = Vec::new();
         for cell in self.grid.iter() {
@@ -110,18 +109,17 @@ impl World {
         }
         let mut processed = Vec::new();
         for (index, cell) in self.grid.iter().enumerate() {
-            if let Some(nb_states) = neighbor_states.get(index) {
-                processed.push(
-                    self.rules.compute(cell.get_state().clone(), nb_states.clone())
-                );
-            }
+            let states = neighbor_states.get(index).unwrap();
+            processed.push(
+                self.rules.compute(cell.get_state(), states)
+            );
         }
 
         processed
     }
 
     //appy changes produced by process_cells() and return statistics
-    fn apply_state_changes(&mut self, new_state: Vec<CellState>) -> StepResult {
+    fn apply_state_changes(&mut self, new_state: Vec<usize>) -> StepResult {
         for (index, new) in new_state.into_iter().enumerate() {
             self.set_cell_state(index, new);
         }

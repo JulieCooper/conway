@@ -7,17 +7,17 @@ pub enum CellState {
 }
 pub struct Cell {
     xy: (u64, u64),
-    state: CellState,
+    state: usize,
 }
 impl Cell {
-    pub fn new(xy: (u64, u64), init: CellState) -> Self {
+    pub fn new(xy: (u64, u64), init: usize) -> Self {
         Cell { xy: xy, state: init }
     }
-    pub fn set_state(&mut self, new: CellState) {
+    pub fn set_state(&mut self, new: usize) {
         self.state = new;
     }
-    pub fn get_state(&self) -> &CellState {
-        &self.state
+    pub fn get_state(&self) -> usize {
+        self.state
     }
     pub fn get_xy(&self) -> (u64, u64) {
         self.xy
