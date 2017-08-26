@@ -2,6 +2,7 @@ input_cell_pattern = "neighbors"
 ruleset = "conway"
 initial_state = "beacon"
 
+
 stopped = true
 delay = 25
 width = 100

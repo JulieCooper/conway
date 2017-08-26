@@ -11,6 +11,7 @@ type RulesetType = HashMap<(usize, usize), Vec<(usize/*amount*/, usize)>>;
 pub enum Rulesets {
     Custom,
     Conway,
+    Wire,
 //    ConwayEasy,
 //    ConwayVeryEasy,
 //    Decay,
@@ -25,6 +26,7 @@ impl FromStr for Rulesets {
     fn from_str(s: &str) -> Result<Rulesets, ()> {
         match s {
             "Conway" => Ok(Rulesets::Conway),
+            "Wire" => Ok(Rulesets::Wire),
             _ => Err(()),
         }
     }
@@ -41,42 +43,24 @@ impl Rulesets {
             },
             Rulesets::Conway => {
                 let mut ruleset = DSLRuleset::new();
+                ruleset.add_states(vec!["dead", "live"]);
                 ruleset.add_cases("dead", "live", vec![(3, "live")]);
-                //ruleset.add_cases(1, 1, vec![
-                //    (0, Dead), (1, Dead), (4, Dead), (5, Dead),
-                //    (6, Dead), (7, Dead), (8, Dead), (9, Dead),
-                //]);
+                ruleset.add_cases("live", "live", vec![
+                    (0, "dead"), (1, "dead"), (4, "dead"), (5, "dead"),
+                    (6, "dead"), (7, "dead"), (8, "dead"), (9, "dead"),
+                ]);
                 ruleset
             },
-            //Rulesets::ConwayEasy => {
-            //    let mut ruleset = DSLRuleset::new();
-            //    ruleset.add_cases(Dead, Live, vec![(3, Live)]);
-            //    ruleset.add_cases(Live, Live, vec![
-            //        (0, Dead), (1, Dead), (2, Live), (3, Live), 
-            //        (4, Dead), (5, Dead), (6, Dead), (7, Live), (8, Dead), 
-            //    ]);
-            //    ruleset
-            //},
-            //Rulesets::ConwayVeryEasy => {
-            //    let mut ruleset = DSLRuleset::new();
-            //    ruleset.add_cases(Dead, Live, vec![
-            //        (3, Live), (4, Live),
-            //    ]);
-            //    ruleset.add_cases(Live, Live, vec![
-            //        (0, Dead), (1, Dead), (4, Dead), (5, Dead),
-            //        (6, Dead), (7, Live), (8, Dead), (9, Dead),
-            //    ]);
-            //    ruleset
-            //},
-            //Rulesets::Decay => {
-            //    let mut ruleset = DSLRuleset::new();
-            //    ruleset.add_cases(Dead, Live, vec![(3, Live), (4, Live)]);
-            //    ruleset.add_cases(Live, Live, vec![
-            //        (0, Dead), (1, Live), (2, Dead), (3, Dead), 
-            //        (4, Live), (5, Dead), (6, Dead), (7, Dead), (8, Dead), 
-            //    ]);
-            //    ruleset
-            //},
+            Rulesets::Wire => {
+                let mut ruleset = DSLRuleset::new();
+                ruleset.add_states(vec!["empty", "head", "tail", "conductor"]);
+                ruleset.add_cases("head", "none", vec![(0, "tail")]);
+                ruleset.add_cases("tail", "none", vec![(0, "conductor")]);
+                ruleset.add_cases("conductor", "head", vec![
+                    (1, "head"), (2, "head")
+                ]);
+                ruleset
+            },
         }
     }
 }
@@ -87,11 +71,16 @@ pub struct DSLRuleset {
 impl DSLRuleset {
     pub fn new() -> Self {
         let mut labels = HashMap::new();
-        labels.insert("dead", 0);
-        labels.insert("live", 1);
+        labels.insert("none", 9999);
         DSLRuleset {
             data: HashMap::new(),
             labels: labels,
+        }
+    }
+    pub fn add_states(&mut self, new_states: Vec<&'static str>) {
+        for (index, state) in new_states.iter().enumerate() {
+            //let i = self.labels.len();
+            self.labels.insert(state, index);
         }
     }
     pub fn add_cases(&mut self,
@@ -114,6 +103,9 @@ impl DSLRuleset {
              *self.labels.get(case.1).expect("invalid state")
             )
         }).collect::<Vec<(usize, usize)>>();
+
+        //println!("is: {}, fs: {}", identity_state, for_state);
+        //println!("{:?}", cases);
 
         self.data.insert(key, cases);
     }

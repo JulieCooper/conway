@@ -102,15 +102,18 @@ impl Renderer {
         } else {
             (Color::Black, Color::Black)
         };
-        set_color_pair(1, self.options.dead_color.clone(), dead_bg);
-        set_color_pair(2, self.options.color.clone(), live_bg);
+        //set_color_pair(1, self.options.dead_color.clone(), dead_bg);
+        //set_color_pair(2, self.options.color.clone(), live_bg);
+        set_color_pair(1, Color::Black, Color::Black);
+        set_color_pair(2, Color::Blue, Color::Black);
+        set_color_pair(3, Color::Red, Color::Black);
+        set_color_pair(4, Color::Yellow, Color::Black);
     }
 
     pub fn render(&self, grid: &Vec<Cell>) {
         erase();
-        let mut buf: [u8; 4] = [0; 4];
         for (index, cell) in grid.iter().enumerate() {
-            if let 0 = cell.get_state() {
+            if cell.get_state() == 0 {
                 if self.options.inverse {
                     attron(COLOR_PAIR(2));
                     //&self.options.live_char.encode_utf8(&mut buf);
@@ -122,7 +125,7 @@ impl Renderer {
                     //let s = str::from_utf8(&buf[..self.options.dead_char.len_utf8()]).unwrap();
                     printw(&self.options.dead_char);
                 }
-            } else {
+            } else if cell.get_state() == 1 {
                 if self.options.inverse {
                     attron(COLOR_PAIR(1));
                     //&self.options.dead_char.encode_utf8(&mut buf);
@@ -133,6 +136,30 @@ impl Renderer {
                     //&self.options.live_char.encode_utf8(&mut buf);
                     //let s = str::from_utf8(&buf[..self.options.live_char.len_utf8()]).unwrap();
                     printw(&self.options.live_char);
+                }
+            } else if cell.get_state() == 2 {
+                if self.options.inverse {
+                    attron(COLOR_PAIR(1));
+                    //&self.options.dead_char.encode_utf8(&mut buf);
+                    //let s = str::from_utf8(&buf[..self.options.dead_char.len_utf8()]).unwrap();
+                    printw("t");
+                } else {
+                    attron(COLOR_PAIR(3));
+                    //&self.options.live_char.encode_utf8(&mut buf);
+                    //let s = str::from_utf8(&buf[..self.options.live_char.len_utf8()]).unwrap();
+                    printw("t");
+                }
+            } else if cell.get_state() == 3 {
+                if self.options.inverse {
+                    attron(COLOR_PAIR(1));
+                    //&self.options.dead_char.encode_utf8(&mut buf);
+                    //let s = str::from_utf8(&buf[..self.options.dead_char.len_utf8()]).unwrap();
+                    printw("c");
+                } else {
+                    attron(COLOR_PAIR(4));
+                    //&self.options.live_char.encode_utf8(&mut buf);
+                    //let s = str::from_utf8(&buf[..self.options.live_char.len_utf8()]).unwrap();
+                    printw("c");
                 }
             }
             if index % self.options.width == self.options.width-1 {

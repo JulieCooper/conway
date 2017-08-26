@@ -92,11 +92,14 @@ impl World {
 
         //format neighbor states for input to ruleset (Amount, ResultState)
         let mut output_vector = Vec::new();
-        for state in vec![0, 1].iter() {
+        for state in vec![0, 1, 2, 3, 9999].iter() {
             let num = neighbor_states.iter().filter(|x| x == &state).count();
             output_vector.push( (state.clone(), num) );
         }
 
+        if xy == (0, 0) {
+            //println!("{:?}", output_vector);
+        }
         output_vector
     }
 

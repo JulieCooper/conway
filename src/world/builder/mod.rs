@@ -11,7 +11,7 @@ use rand::Rng;
 pub enum InitialState {
     Blank(CellState),
     Random,
-    Ordered(Vec<(u64, u64)>),
+    Ordered(Vec<(u64, u64, usize)>),
     Library(Design),
     Lambda,
 }
@@ -24,7 +24,7 @@ impl FromStr for InitialState {
             "Blank" => Ok(InitialState::Blank(CellState::Dead)),
             "Filled" => Ok(InitialState::Blank(CellState::Live)),
             //prefab
-            "Eureka" => Ok(InitialState::Library(Design::Eureka)),
+            "WireTest" => Ok(InitialState::Library(Design::WireTest)),
             _ => Err(()),
         }
     }
@@ -79,18 +79,16 @@ impl WorldBuilder {
     fn populate_random(grid_ref: &mut Vec<Cell>) {
         let mut rng = rand::thread_rng();
         for cell in grid_ref.iter_mut() {
-            match rng.gen() {
-                true => cell.set_state(1),
-                false => cell.set_state(1),
-            };
+           let state =  rng.gen_range(0, 3);
+           cell.set_state(state);
         }
     }
-    fn populate_ordered(&self, grid_ref: &mut Vec<Cell>, coords: &Vec<(u64, u64)>) {
+    fn populate_ordered(&self, grid_ref: &mut Vec<Cell>, coords: &Vec<(u64, u64, usize)>) {
         WorldBuilder::populate_all(grid_ref, 0);
         for coord in coords.iter() {
             match grid_ref.get_mut(self.gen_index(coord.0, coord.1)) {
                 Some(cell) => {
-                    cell.set_state(1);
+                    cell.set_state(coord.2);
                 },
                 None => panic!("invalid init coord"),
             }
