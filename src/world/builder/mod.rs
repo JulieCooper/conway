@@ -79,7 +79,12 @@ impl WorldBuilder {
     fn populate_random(grid_ref: &mut Vec<Cell>) {
         let mut rng = rand::thread_rng();
         for cell in grid_ref.iter_mut() {
-           let state =  rng.gen_range(0, 3);
+           let state =  rng.gen_range(0, 1000);
+           let state = match state {
+               0...2 => 1,
+               1...400 => 3,
+               _ => 0,
+           };
            cell.set_state(state);
         }
     }
