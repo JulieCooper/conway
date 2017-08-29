@@ -104,10 +104,18 @@ impl Renderer {
         };
         //set_color_pair(1, self.options.dead_color.clone(), dead_bg);
         //set_color_pair(2, self.options.color.clone(), live_bg);
-        set_color_pair(1, Color::Black, Color::Black);
-        set_color_pair(2, Color::Blue, Color::Black);
-        set_color_pair(3, Color::Red, Color::Black);
-        set_color_pair(4, Color::Yellow, Color::Black);
+        if self.options.filled {
+            set_color_pair(1, Color::Black, Color::Black);
+            set_color_pair(2, Color::Blue, Color::Blue);
+            set_color_pair(3, Color::Red, Color::Red);
+            //set_color_pair(4, Color::Yellow, Color::Yellow);
+            set_color_pair(4, Color::Black, Color::Black);
+        } else {
+            set_color_pair(1, Color::Black, Color::Black);
+            set_color_pair(2, Color::Blue, Color::Black);
+            set_color_pair(3, Color::Red, Color::Black);
+            set_color_pair(4, Color::Yellow, Color::Black);
+        }
     }
 
     pub fn render(&self, grid: &Vec<Cell>) {
