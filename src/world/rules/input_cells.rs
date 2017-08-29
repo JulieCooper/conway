@@ -4,6 +4,7 @@ use std::str::FromStr;
 pub enum InputCells {
     Custom(Vec<(i8, i8)>),
     Neighbors,
+    Extended,
     NoCorners,
     CornersOnly,
     FarOnly,
@@ -15,6 +16,7 @@ impl FromStr for InputCells {
     fn from_str(s: &str) -> Result<InputCells, ()> {
         match s {
             "Neighbors" => Ok(InputCells::Neighbors),
+            "Extended" => Ok(InputCells::Extended),
             "NoCorners" => Ok(InputCells::NoCorners),
             "CornersOnly" => Ok(InputCells::CornersOnly),
             "FarOnly" => Ok(InputCells::FarOnly),
@@ -32,6 +34,14 @@ impl InputCells {
                 (-1,-1), (0,-1), (1,-1),
                 (-1, 0),         (1, 0),
                 (-1, 1), (0, 1), (1, 1)
+                ]
+            },
+            InputCells::Extended => {
+                vec![
+                    (0, -2), (0, -1),
+                    (-2, 0), (-1, 0),
+                    (0, 1), (0, 2),
+                    (1, 0), (2, 0),
                 ]
             },
             InputCells::NoCorners => {

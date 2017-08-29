@@ -11,7 +11,9 @@ type RulesetType = HashMap<(usize, usize), Vec<(usize/*amount*/, usize)>>;
 pub enum Rulesets {
     Custom,
     Conway,
+    Decay,
     Wire,
+    Bounce,
 //    ConwayEasy,
 //    ConwayVeryEasy,
 //    Decay,
@@ -26,7 +28,9 @@ impl FromStr for Rulesets {
     fn from_str(s: &str) -> Result<Rulesets, ()> {
         match s {
             "Conway" => Ok(Rulesets::Conway),
+            "Decay" => Ok(Rulesets::Decay),
             "Wire" => Ok(Rulesets::Wire),
+            "Bounce" => Ok(Rulesets::Bounce),
             _ => Err(()),
         }
     }
@@ -51,14 +55,31 @@ impl Rulesets {
                 ]);
                 ruleset
             },
+            Rulesets::Decay => {
+                let mut ruleset = DSLRuleset::new();
+                ruleset.add_states(vec!["dead", "live"]);
+                ruleset.add_cases("dead", "live", vec![(3, "live"), (4, "live")]);
+                ruleset.add_cases("live", "live", vec![
+                    (0, "dead"), (1, "live"), (2, "dead"), (3, "dead"),
+                    (4, "live"), (5, "dead"), (6, "dead"), (7, "dead"), (8, "dead"),
+                ]);
+                ruleset
+            },
             Rulesets::Wire => {
                 let mut ruleset = DSLRuleset::new();
                 ruleset.add_states(vec!["empty", "head", "tail", "conductor"]);
+                //ruleset.add_cases("empty", "none", vec![(0, "conductor")]);
                 ruleset.add_cases("head", "none", vec![(0, "tail")]);
                 ruleset.add_cases("tail", "none", vec![(0, "conductor")]);
                 ruleset.add_cases("conductor", "head", vec![
                     (1, "head"), (2, "head")
                 ]);
+                ruleset
+            },
+            Rulesets::Bounce => {
+                let mut ruleset = DSLRuleset::new();
+                ruleset.add_states(vec![""]);
+
                 ruleset
             },
         }
@@ -71,7 +92,7 @@ pub struct DSLRuleset {
 impl DSLRuleset {
     pub fn new() -> Self {
         let mut labels = HashMap::new();
-        labels.insert("none", 9999);
+        labels.insert("none", 9998);
         DSLRuleset {
             data: HashMap::new(),
             labels: labels,

@@ -80,9 +80,13 @@ impl WorldBuilder {
         let mut rng = rand::thread_rng();
         for cell in grid_ref.iter_mut() {
            let state =  rng.gen_range(0, 1000);
+           //let state = rng.gen();
            let state = match state {
-               0...2 => 1,
-               1...400 => 3,
+               //false => 0,
+               //true => 1,
+               0...10 => 1,
+               100...700 => 0,
+               700...1000 => 3,
                _ => 0,
            };
            cell.set_state(state);
