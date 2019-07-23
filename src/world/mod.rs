@@ -7,6 +7,7 @@ use self::return_types::{StepResult, StepError};
 pub mod rules;
 use self::rules::{DSLRuleset, Rulesets};
 use self::rules::input_cells::InputCells;
+use rand::Rng;
 
 #[derive(Clone)]
 pub struct WorldOptions {
@@ -61,7 +62,24 @@ impl World {
         }
     }
 
-    fn set_cell_state(&mut self, index: usize, new: CellState) {
+    pub fn add_random_cells(&mut self, amt: usize) {
+        let mut rng = rand::thread_rng();
+        let grid_len = self.grid.len();
+
+        for cell in self.grid.iter_mut() {
+            if rng.gen_range(0, 1000) >= 950 {
+                cell.set_state(CellState::Live);
+            };
+        }
+        //for _ in 0..amt {
+        //    let new_cell = rng.gen_range(0, grid_len);
+        //    //println!("{}", grid_len);
+        //    self.set_cell_state(new_cell, CellState::Live);
+        //}
+        //println!("added {} cells", amt);
+    }
+
+    pub fn set_cell_state(&mut self, index: usize, new: CellState) {
         if let Some(cell) = self.grid.get_mut(index) {
             cell.set_state(new)
         }

@@ -1,8 +1,16 @@
 extern crate ncurses;
+extern crate midir;
+use midir::{MidiInput, MidiOutput, Ignore};
 use ncurses::{clear, getch, nodelay, stdscr};
+use std::{thread, time, str};
 extern crate conway;
+extern crate rand;
+use rand::Rng;
 //use conway::world::return_types::{StepError, StepResult};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use conway::world::{World, WorldOptions};
+use conway::world::cell::{Cell, CellState};
 use conway::world::rules::Rulesets;
 use conway::world::rules::input_cells::InputCells;
 use conway::world::builder::InitialState;
@@ -58,6 +66,27 @@ fn main() {
     renderer.set_options(render_opts);
 
     let mut world = World::new(world_opts);
+    
+    let mut rng = rand::thread_rng();
+    //SETUP MIDI STUFF
+    let mut midi_in = MidiInput::new("midi_pipe_in").unwrap();
+    midi_in.ignore(Ignore::None);
+    let mut input_port_number: usize = 5500;
+
+    for i in 0..midi_in.port_count() {
+        if midi_in.port_name(i).unwrap().contains("APC Key 25") {
+            input_port_number = i;
+        }
+    }
+    let mut ADD_RANDOM_CELLS = Arc::new(AtomicBool::new(true));
+    let mut a_r_c_ref1 = Arc::clone(&ADD_RANDOM_CELLS);
+    let mut a_r_c_ref2 = Arc::clone(&ADD_RANDOM_CELLS);
+    let _conn_in_ = midi_in.connect(input_port_number, "conway-midi-in", move |stamp, message, _| {
+        //println!("{}: {:?} (len = {})", stamp, message, message.len());
+        a_r_c_ref1.store(true, Ordering::Relaxed);
+        //a_r_c_ref1 = Arc::new(AtomicBool::new(true));
+    }, ());
+    //
 
     let mut run = true;
     while run {
@@ -71,6 +100,34 @@ fn main() {
         }
 
         renderer.render(world.return_grid());
+        //thread::sleep(time::Duration::from_millis(100));
+
+        ////////////////////////////////////////
+        //let mut a_r_c: &AtomicBool = &mut ADD_RANDOM_CELLS;
+        if a_r_c_ref2.load(Ordering::Relaxed) == true {
+            world.add_random_cells(30);
+            //a_r_c_ref2 = Arc::new(AtomicBool::new(false));
+            a_r_c_ref2.store(false, Ordering::Relaxed);
+        }
+        //    let grid_len = world.return_grid().len();
+        //    let new_cells: Vec<u32>;
+        //    for i in 0..30 {
+        //        let new_cell = rng.gen_range(0, grid_len);
+        //        world.set_cell_state(new_cell, CellState::Live);
+        //    }
+        //    println!("ADDING RANDOM CELLS");
+        //    ADD_RANDOM_CELLS = false;
+        //}
+    //fn populate_random(grid_ref: &mut Vec<Cell>) {
+    //    let mut rng = rand::thread_rng();
+    //    for cell in grid_ref.iter_mut() {
+    //        match rng.gen() {
+    //            true => cell.set_state(CellState::Live),
+    //            false => cell.set_state(CellState::Dead),
+    //        };
+    //    }
+    //}
+        ////////////////////////////////////////
 
         match if !paused {
             world.step()
@@ -83,6 +140,7 @@ fn main() {
             Ok(stats) => stats, //FIXME:do something with this. And actually populate them!!!
             Err(e) => panic!("Error stepping world forward: {:?}", e),
         };
+        //println!("test");
     }
 
     clear();
